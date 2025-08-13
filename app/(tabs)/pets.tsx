@@ -4,22 +4,13 @@ import {
   Text,
   FlatList,
   ActivityIndicator,
-  StyleSheet,
   TextInput,
   Button,
 } from "react-native";
-import { getPets, deletePet } from "@/api/pets";
-import Toast from "react-native-toast-message";
-
-type Pet = {
-  id: number;
-  name: string;
-  weight: number;
-  age: number;
-  race: string;
-  image: string;
-  user: number;
-};
+import { getPets } from "@/api/pets";
+import { Pet } from "@/types/pet";
+import { petsStyles as styles } from "@/styles/petsStyles";
+import { handleDeletePet, handleSaveEditPet } from "@/handlers/petsHandlers";
 
 export default function PetsScreen() {
   const [pets, setPets] = useState<Pet[]>([]);
@@ -27,19 +18,22 @@ export default function PetsScreen() {
   const [searchName, setSearchName] = useState("");
   const [filteredPets, setFilteredPets] = useState<Pet[]>([]);
 
+  const [editingPetId, setEditingPetId] = useState<number | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editWeight, setEditWeight] = useState("");
+  const [editAge, setEditAge] = useState("");
+  const [editRace, setEditRace] = useState("");
+
   useEffect(() => {
     const fetchPets = async () => {
       try {
         const data = await getPets();
         setPets(data);
         setFilteredPets(data);
-      } catch (error) {
-        console.error("Error fetching pets:", error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchPets();
   }, []);
 
@@ -48,32 +42,10 @@ export default function PetsScreen() {
       setFilteredPets(pets);
       return;
     }
-
     const filtered = pets.filter((pet) =>
       pet.name.toLowerCase().includes(searchName.trim().toLowerCase())
     );
     setFilteredPets(filtered);
-  };
-
-  const handleDelete = async (id: number) => {
-    try {
-      await deletePet(id);
-      const updated = pets.filter((pet) => pet.id !== id);
-      setPets(updated);
-      setFilteredPets(updated);
-      Toast.show({
-        type: "success",
-        text1: "Mascota eliminada",
-        text2: `La mascota fue eliminada correctamente.`,
-      });
-    } catch (error) {
-      console.error("Error al eliminar la mascota:", error);
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "No se pudo eliminar la mascota.",
-      });
-    }
   };
 
   if (loading) {
@@ -88,8 +60,6 @@ export default function PetsScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Mascotas</Text>
-
-      {/* Buscador */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.input}
@@ -97,63 +67,102 @@ export default function PetsScreen() {
           value={searchName}
           onChangeText={setSearchName}
           onSubmitEditing={searchPets}
-          returnKeyType="search"
         />
         <Button title="Buscar" onPress={searchPets} />
       </View>
 
-      {filteredPets.length === 0 ? (
-        <Text>No se encontraron mascotas con ese nombre.</Text>
-      ) : (
-        <FlatList
-          data={filteredPets}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.card}>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text>Raza: {item.race}</Text>
-              <Text>Peso: {item.weight} kg</Text>
-              <Text>Edad: {item.age} años</Text>
-              <Button
-                title="Eliminar"
-                onPress={() => handleDelete(item.id)}
-                color="red"
-              />
-            </View>
-          )}
-        />
-      )}
+      <FlatList
+        data={filteredPets}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
+            {editingPetId === item.id ? (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={editName}
+                  onChangeText={setEditName}
+                  placeholder="Nombre"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={editWeight}
+                  onChangeText={setEditWeight}
+                  placeholder="Peso"
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={editAge}
+                  onChangeText={setEditAge}
+                  placeholder="Edad"
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={editRace}
+                  onChangeText={setEditRace}
+                  placeholder="Raza"
+                />
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Button
+                    title="Guardar"
+                    onPress={() =>
+                      handleSaveEditPet(
+                        item.id,
+                        editName,
+                        editWeight,
+                        editAge,
+                        editRace,
+                        pets,
+                        setPets,
+                        setFilteredPets,
+                        setEditingPetId
+                      )
+                    }
+                  />
+                  <Button
+                    title="Cancelar"
+                    onPress={() => setEditingPetId(null)}
+                    color="gray"
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text>Raza: {item.race}</Text>
+                <Text>Peso: {item.weight} kg</Text>
+                <Text>Edad: {item.age} años</Text>
+                <View style={{ flexDirection: "row", gap: 8, marginTop: 5 }}>
+                  <Button
+                    title="Editar"
+                    onPress={() => {
+                      setEditingPetId(item.id);
+                      setEditName(item.name);
+                      setEditWeight(String(item.weight));
+                      setEditAge(String(item.age));
+                      setEditRace(item.race);
+                    }}
+                  />
+                  <Button
+                    title="Eliminar"
+                    onPress={() =>
+                      handleDeletePet(item.id, pets, setPets, setFilteredPets)
+                    }
+                    color="red"
+                  />
+                </View>
+              </>
+            )}
+          </View>
+        )}
+      />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#fff" },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 12 },
-  card: {
-    backgroundColor: "#f9f9f9",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  name: { fontSize: 18, fontWeight: "600" },
-  searchContainer: {
-    flexDirection: "row",
-    marginBottom: 12,
-    alignItems: "center",
-  },
-  input: {
-    flex: 1,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 40,
-    marginRight: 10,
-  },
-});

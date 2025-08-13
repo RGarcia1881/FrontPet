@@ -1,5 +1,15 @@
 import API from './api';
 
+export type Pet = {
+  id: number;
+  name: string;
+  weight: number;
+  age: number;
+  race: string;
+  image: string;
+  user: number;
+};
+
 export const getPets = async () => {
   const res = await API.get('/pets/');
   return res.data;

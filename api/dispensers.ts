@@ -1,5 +1,18 @@
 import API from './api';
 
+export type Dispenser = {
+  id: number;
+  ubication: string;
+  status: boolean;
+  timetable: string;
+  FC: number; // Food Capacity
+  WC: number; // Water Capacity
+  FP: boolean; // Food Present
+  WP: boolean; // Water Present
+  user: number; // User ID
+  pet: number; // Pet ID
+};
+
 export const getDispensers = async () => {
   const res = await API.get('/dispensers/');
   return res.data;

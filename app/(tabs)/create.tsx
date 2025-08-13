@@ -4,15 +4,15 @@ import {
   Text,
   TextInput,
   Button,
-  StyleSheet,
   Alert,
   ScrollView,
   ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
-import { createPet } from "@/api/pets";
 import { getUsers, User } from "@/api/users";
+import { createPetStyles as styles } from "@/styles/createPetsStyles"; // Note: You'll need to update the path
+import { handleSubmit } from "@/handlers/createPetHandlers"; // Note: You'll need to update the path
 
 export default function CreatePet() {
   const router = useRouter();
@@ -45,56 +45,6 @@ export default function CreatePet() {
     };
     fetchUsers();
   }, []);
-
-  const handleSubmit = async () => {
-    if (!name.trim()) {
-      Alert.alert("Error", "El nombre es obligatorio");
-      return;
-    }
-    if (!weight || isNaN(Number(weight))) {
-      Alert.alert("Error", "El peso debe ser un número");
-      return;
-    }
-    if (!age || isNaN(Number(age))) {
-      Alert.alert("Error", "La edad debe ser un número");
-      return;
-    }
-    if (!race.trim()) {
-      Alert.alert("Error", "La raza es obligatoria");
-      return;
-    }
-    if (userId === null) {
-      Alert.alert("Error", "Debe seleccionar un usuario");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      // Crear objeto sin campo image si está vacío
-      const petData: any = {
-        name: name.trim(),
-        weight: Number(weight),
-        age: Number(age),
-        race: race.trim(),
-        user: userId,
-      };
-      if (image.trim()) {
-        petData.image = image.trim();
-      }
-
-      console.log("Enviando:", petData);
-
-      await createPet(petData);
-      Alert.alert("Éxito", "Mascota creada");
-      router.push("/pets");
-    } catch (error: any) {
-      console.error("Error API:", error.response?.data ?? error.message);
-      Alert.alert("Error", "No se pudo crear la mascota");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loadingUsers) {
     return (
@@ -165,40 +115,20 @@ export default function CreatePet() {
 
       <Button
         title={loading ? "Creando..." : "Crear"}
-        onPress={handleSubmit}
+        onPress={() =>
+          handleSubmit({
+            name,
+            weight,
+            age,
+            race,
+            image,
+            userId,
+            setLoading,
+            router,
+          })
+        }
         disabled={loading}
       />
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: "#fff",
-    flexGrow: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 6,
-    padding: 10,
-    marginBottom: 15,
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 6,
-    marginBottom: 15,
-  },
-});
