@@ -4,6 +4,7 @@ export type User = {
   id: number;
   name: string;
   email: string;
+  password: string; // Optional for updates
 };
 
 // Obtener todos los usuarios
