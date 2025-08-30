@@ -254,23 +254,11 @@ export default function DispensersScreen() {
                   <Button
                     title="Eliminar"
                     onPress={() =>
-                      Alert.alert(
-                        "Confirmar eliminación",
-                        `¿Estás seguro de que quieres eliminar el dispensador en ${item.location}?`,
-                        [
-                          { text: "Cancelar", style: "cancel" },
-                          {
-                            text: "Eliminar",
-                            style: "destructive",
-                            onPress: () =>
-                              handleDeleteDispenser(
-                                item.id,
-                                dispensers,
-                                setDispensers,
-                                setFilteredDispensers
-                              ),
-                          },
-                        ]
+                      handleDeleteDispenser(
+                        item.id,
+                        dispensers,
+                        setDispensers,
+                        setFilteredDispensers
                       )
                     }
                     color="red"
