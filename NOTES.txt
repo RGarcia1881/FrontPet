@@ -2,6 +2,8 @@ Pendiente:
 -Actualizar las tablas despues de crear algo nuevo (dispensador, mascota o usuario)
 ya que no se muestra
 -Corregir errores en el codigo de pets.
--Hacer rutina para sensores B y bomba de agua
 -Conectar rutinas a base de datos del dispensador
 -Agregar condicionantes para marcar plato lleno y porcentajes de alimento y comida
+
+-Conectar calibracion de platos con el front (Ya funciona con postman)
+

@@ -1,102 +1,97 @@
-// handlers/esp32Handlers.ts
+import { Dispatch, SetStateAction } from 'react';
+import { readSensor, activateMotor, activatePump, startCalibration, finishCalibration } from '@/api/esp32';
+import { AxiosResponse } from 'axios';
 
-import { readSensor, activateMotor, activatePump } from '@/api/esp32';
+type MessageType = 'success' | 'error';
 
-// --- Función para leer un sensor (sin cambios) ---
-export const handleReadSensor = async (sensor: string, setMessage: (msg: string) => void, setMessageType: (type: 'success' | 'error') => void) => {
+// --- Handlers para las acciones del ESP32 ---
+
+export const handleReadSensor = async (
+  sensor: string,
+  setMessage: Dispatch<SetStateAction<string>>,
+  setMessageType: Dispatch<SetStateAction<MessageType>>
+) => {
   try {
     const res = await readSensor(sensor as any);
-    const message = res?.data?.value ? `Lectura del sensor ${sensor}: ${res.data.value}` : `No se pudo leer el sensor ${sensor}.`;
+    const value = res.data[sensor];
+    const message = value ? `Lectura del sensor ${sensor}: ${value}` : `No se pudo leer el sensor ${sensor}.`;
     setMessage(message);
-    setMessageType(res?.data?.value ? 'success' : 'error');
-    return res?.data?.value || null;
+    setMessageType(value ? 'success' : 'error');
+    return value || null;
   } catch (error) {
     console.error("Error al leer el sensor:", error);
-    let errorMessage = `Error de conexión: No se pudo leer el sensor ${sensor}.`;
-    if (error instanceof Error) {
-      errorMessage = `Error: ${error.message}`;
-    }
-    setMessage(errorMessage);
+    setMessage(`Error de conexión: No se pudo leer el sensor ${sensor}.`);
     setMessageType('error');
     return null;
   }
 };
 
-// --- Función para activar el motor (ahora devuelve el mensaje para usarlo en la rutina) ---
-export const handleActivateMotor = async (setMessage: (msg: string) => void, setMessageType: (type: 'success' | 'error') => void) => {
+export const handleActivateMotor = async (
+  setMessage: Dispatch<SetStateAction<string>>,
+  setMessageType: Dispatch<SetStateAction<MessageType>>
+) => {
   try {
     const res = await activateMotor();
-    const message = res?.data?.salida || "Respuesta del servidor no válida.";
+    const message = res?.data?.message || "Respuesta del servidor no válida.";
     setMessage(message.trim());
     setMessageType('success');
-    return message.trim(); // <-- Devuelve el mensaje aquí
+    return message.trim();
   } catch (error) {
     console.error("Error al activar el motor:", error);
-    let errorMessage = "Error de conexión: No se pudo activar el motor.";
-    if (error instanceof Error) {
-      errorMessage = `Error: ${error.message}`;
-    }
-    setMessage(errorMessage);
+    setMessage("Error de conexión: No se pudo activar el motor.");
     setMessageType('error');
-    return null; // Devuelve null en caso de error
+    return null;
   }
 };
 
-// --- Función para activar la bomba (sin cambios) ---
-export const handleActivatePump = async (setMessage: (msg: string) => void, setMessageType: (type: 'success' | 'error') => void) => {
+export const handleActivatePump = async (
+  setMessage: Dispatch<SetStateAction<string>>,
+  setMessageType: Dispatch<SetStateAction<MessageType>>
+) => {
   try {
     const res = await activatePump();
-    const message = res?.data?.salida || "Respuesta del servidor no válida.";
+    const message = res?.data?.message || "Respuesta del servidor no válida.";
     setMessage(message.trim());
     setMessageType('success');
   } catch (error) {
     console.error("Error al activar la bomba:", error);
-    let errorMessage = "Error de conexión: No se pudo activar la bomba.";
-    if (error instanceof Error) {
-      errorMessage = `Error: ${error.message}`;
-    }
-    setMessage(errorMessage);
+    setMessage("Error de conexión: No se pudo activar la bomba.");
     setMessageType('error');
   }
 };
 
-// --- Manejador de la rutina de comida (actualizado para incluir el mensaje del motor) ---
 export const handleFoodRoutine = async (
-  setMessage: (msg: string) => void,
-  setMessageType: (type: 'success' | 'error') => void,
-  setLoading: (loading: boolean) => void
+  setMessage: Dispatch<SetStateAction<string>>,
+  setMessageType: Dispatch<SetStateAction<MessageType>>,
+  setLoading: Dispatch<SetStateAction<boolean>>
 ) => {
   setLoading(true);
-  setMessage("Iniciando rutina...");
+  setMessage("Iniciando rutina de comida...");
 
-  let motorMessage = null; // Variable para almacenar el mensaje del motor
+  let motorMessage = null;
   let pesoValue = null;
   let distanciaValue = null;
 
   try {
-    // 1. Activar Motor y guardar el mensaje
-    setMessage("Paso 1/3: Activando motor...");
+    setMessage("Activando motor...");
     motorMessage = await handleActivateMotor(setMessage, setMessageType);
     if (!motorMessage) throw new Error("Fallo al activar el motor");
 
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // 2. Leer Sensor de Peso A
-    setMessage("Paso 2/3: Leyendo sensor de peso A...");
+
+    setMessage("Leyendo sensor de peso A...");
     pesoValue = await handleReadSensor('PESO_A', setMessage, setMessageType);
     if (!pesoValue) throw new Error("Fallo al leer sensor de peso A");
 
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // 3. Leer Sensor de Distancia A
-    setMessage("Paso 3/3: Leyendo sensor de distancia A...");
+    setMessage("Leyendo sensor de distancia A...");
     distanciaValue = await handleReadSensor('DISTANCIA_A', setMessage, setMessageType);
     if (!distanciaValue) throw new Error("Fallo al leer sensor de distancia A");
 
-    // Resumen Final (con el mensaje del motor)
-    const finalMessage = `Rutina finalizada con éxito:\n\n` + 
-      `${motorMessage}\n` + 
-      `Peso A: ${pesoValue}\n` + 
+    const finalMessage = `Rutina finalizada con éxito:\n\n` +
+      `Mensaje del motor: ${motorMessage}\n` +
+      `Peso A: ${pesoValue}\n` +
       `Distancia A: ${distanciaValue}`;
 
     setMessage(finalMessage);
@@ -104,13 +99,43 @@ export const handleFoodRoutine = async (
 
   } catch (error) {
     console.error("Error en la rutina:", error);
-    let errorMessage = "Error desconocido en la rutina.";
-    if (error instanceof Error) {
-      errorMessage = `Rutina fallida: ${error.message}`;
-    }
+    const errorMessage = error instanceof Error ? `Rutina fallida: ${error.message}` : "Error desconocido en la rutina.";
     setMessage(errorMessage);
     setMessageType('error');
   } finally {
     setLoading(false);
   }
+};
+
+export const handleWaterRoutine = async (
+  setMessage: Dispatch<SetStateAction<string>>,
+  setMessageType: Dispatch<SetStateAction<MessageType>>,
+  setLoading: Dispatch<SetStateAction<boolean>>
+) => {
+  setLoading(true);
+  setMessage("Iniciando rutina de agua...");
+  try {
+    const res = await activatePump();
+    setMessage("Rutina de agua finalizada: Bomba activada.");
+    setMessageType('success');
+  } catch (error) {
+    console.error("Error en la rutina:", error);
+    setMessage("Fallo en la rutina de agua.");
+    setMessageType('error');
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Calibración de dos pasos
+export const handleCalibrateTare = async (scale: 'A' | 'B'): Promise<AxiosResponse> => {
+  return await startCalibration(scale);
+};
+
+export const handleCalibrateSetWeight = async (scale: 'A' | 'B', knownWeight: string): Promise<AxiosResponse> => {
+  const weight = parseFloat(knownWeight);
+  if (isNaN(weight) || weight <= 0) {
+    throw new Error("El peso conocido no es un número válido.");
+  }
+  return await finishCalibration(scale, weight);
 };
