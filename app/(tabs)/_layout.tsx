@@ -27,29 +27,38 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="house.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="paperplane.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="pets"
         options={{
           title: "Mascotas",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="pawprint.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="dispensers"
+        options={{
+          title: "Dispensadores",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="cube.box.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="calibrationScreen"
+        options={{
+          title: "Calibrar",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="scale.3d" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="videoStreamScreen"
+        options={{
+          title: "Cámara",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="video.fill" color={color} />
           ),
         }}
       />
@@ -68,24 +77,6 @@ export default function TabLayout() {
           title: "Usuarios",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="person.3.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="dispensers"
-        options={{
-          title: "Dispensadores",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="cube.box.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="test"
-        options={{
-          title: "Test",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="hammer.fill" color={color} />
           ),
         }}
       />
