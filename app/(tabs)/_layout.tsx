@@ -27,33 +27,6 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="pets"
-        options={{
-          title: "Mascotas",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="pawprint.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="dispensers"
-        options={{
-          title: "Dispensadores",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="cube.box.fill" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="calibrationScreen"
-        options={{
-          title: "Calibrar",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="scale.3d" color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="videoStreamScreen"
         options={{
           title: "Cámara",
@@ -62,6 +35,18 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="homeScreen"
+        options={{
+          title: "Inicio",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="house.fill" color={color} />
+          ),
+        }}
+      />
+      {/* Pantallas ocultas en el TabBar */}
+      {/* Estas pantallas no mostrarán un ícono en la barra de pestañas */}
+
       <Tabs.Screen
         name="createPet"
         options={{
