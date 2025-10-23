@@ -1,4 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { AppColors, AppFonts } from '@/styles/theme';
+
 
 const colors = {
 primaryBlue: '#7799B7',
@@ -12,11 +14,12 @@ export const homeStyles = StyleSheet.create({
 // Contenedor principal de la pantalla
 container: {
 flex: 1,
-backgroundColor: colors.lightBackground,
+backgroundColor: AppColors.light,
 },
 // Estilo para el contenido principal (donde irá el resto de la app)
 content: {
 paddingHorizontal: 0,
 paddingTop: 0,
+backgroundColor: AppColors.light,
 },
 });

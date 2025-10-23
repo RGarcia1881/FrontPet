@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { AppColors, AppFonts } from '@/styles/theme';
 
 const colors = {
 primaryBlue: '#85aac3',
@@ -12,7 +13,7 @@ export const headerStyles = StyleSheet.create({
 
 container: {
 flex: 1,
-backgroundColor: colors.lightBackground,
+backgroundColor: AppColors.light,
 },
 
 // ⭐️ ESTILOS DEL HEADER (Cabecera) ⭐️
@@ -21,9 +22,9 @@ flexDirection: 'row',
 justifyContent: 'space-between',
 alignItems: 'center',
 paddingHorizontal: 20,
-paddingTop: 40, // Espacio para el notch y barra de estado
+paddingTop: 20, // Espacio para el notch y barra de estado
 paddingBottom: 0,
-backgroundColor: colors.lightBackground,
+backgroundColor: AppColors.light,
 borderBottomWidth: 0, // No border, looks cleaner
 },
 

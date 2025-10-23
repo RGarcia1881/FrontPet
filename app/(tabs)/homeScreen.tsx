@@ -2,6 +2,7 @@
 
 import React from "react";
 import { View, StyleSheet, SafeAreaView } from "react-native";
+import { AppColors } from "@/styles/theme";
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -72,9 +73,12 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // Añade tu color de fondo principal aquí
+    // 🔥 2. ASIGNACIÓN DEL FONDO SÓLIDO
+    backgroundColor: AppColors.light,
   },
   contentContainer: {
     paddingBottom: 20,
+    // (Opcional) Asegura el fondo también en el contentContainer por si acaso
+    backgroundColor: AppColors.light,
   },
 });

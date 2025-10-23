@@ -169,7 +169,6 @@ export default function DispenserScreen() {
           {/* 🔥 Pasamos 'onAddClick' al CentralDispenserInfo */}
           {centralInfoProps && <CentralDispenserInfo {...centralInfoProps} />}
         </View>
-        <View style={{ height: 50 }} />
       </ScrollView>
     </SafeAreaView>
   );

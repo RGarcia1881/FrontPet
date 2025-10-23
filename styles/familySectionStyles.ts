@@ -13,6 +13,7 @@ export const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'light',
         fontFamily: AppFonts.primary,
+        backgroundColor: AppColors.light,
         color: AppColors.dark,
         paddingHorizontal: 20, // Se mantiene aquí para el título
         marginBottom: 15,

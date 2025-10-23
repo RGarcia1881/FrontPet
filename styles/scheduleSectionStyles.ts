@@ -21,7 +21,7 @@ export const styles = StyleSheet.create({
         width: '100%', 
         paddingHorizontal: 20,
         paddingTop: 10,
-        backgroundColor: colors.lightBackground,
+        backgroundColor: AppColors.light,
     },
 
     // 1. Contenedor de la parte superior (Saludo y Botón)

@@ -48,6 +48,7 @@ export const dispenserScreenStyles = StyleSheet.create({
         zIndex: 2,
         justifyContent: 'center',
         alignItems: 'center',
+        marginTop: -70,
     },
     
     // --- DISEÑO CIRCULAR EXTERIOR (Contenedor principal sin borde) ---

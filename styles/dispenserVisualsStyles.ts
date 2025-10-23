@@ -13,7 +13,7 @@ export const dispenserVisualsStyles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         // Margen negativo para superponer el círculo central en DispenserScreen.tsx
-        marginBottom: -70, 
+        marginBottom: 10, 
         zIndex: 2,
     },
     

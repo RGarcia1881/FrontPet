@@ -38,17 +38,17 @@ const DISPENSER_SMALL_GRAPHIC = require("@/assets/images/Dispensador.png");
 
 // 🔑 DEFINICIÓN DE POSICIONES Y COORDENADAS CARTESIANAS
 const getPositions = (width: number) => {
-  const CIRCULAR_CONTAINER_SIZE = width * 0.75;
+  const CIRCULAR_CONTAINER_SIZE = width * 0.9;
 
   // R: Distancia desde el centro (0,0) a los íconos pequeños.
   // Ajusta el '30' si el giro no se alinea con tu diseño.
   const R = CIRCULAR_CONTAINER_SIZE / 2 + 30;
 
   return {
-    center: { x: 0, y: -30, scale: 1.0, zIndex: 10 },
-    right: { x: 30, y: 75, scale: 0.8, zIndex: 5 },
-    bottom: { x: -125, y: 230, scale: 0.8, zIndex: 5 },
-    add: { x: -300, y: 75, scale: 0.8, zIndex: 5 },
+    center: { x: 0, y: 10, scale: 1.0, zIndex: 10 },
+    right: { x: 35, y: 120, scale: 0.8, zIndex: 5 },
+    bottom: { x: -125, y: 290, scale: 0.8, zIndex: 5 },
+    add: { x: -285, y: 120, scale: 0.8, zIndex: 5 },
   };
 };
 

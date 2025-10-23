@@ -6,6 +6,7 @@ import { AppColors, AppFonts } from '@/styles/theme';
 export const styles = StyleSheet.create({
     container: {
         paddingVertical: 20,
+        backgroundColor: AppColors.light,
     },
     
     // 1. Header (Mis dispensadores. | Ver dispensadores)
