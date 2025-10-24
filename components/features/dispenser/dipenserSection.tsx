@@ -4,7 +4,7 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { styles } from "@/styles/dispenserSectionStyles";
-import { AppColors } from "@/styles/theme";
+import { AppColors } from "@/styles/global/theme";
 
 // 🔥 Importaciones de Reanimated para la lógica de activación
 import Animated, {
@@ -17,7 +17,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 // Importamos el componente de animación
-import { AnimatedLevel } from "@/components/ui/animatedLevel";
+import { AnimatedLevel } from "@/components/features/dispenser/animatedLevel";
 
 const DISPENSER_IMAGE = require("@/assets/images/Dispensador.png");
 

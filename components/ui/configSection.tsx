@@ -3,7 +3,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // 🔥 Usando Ionicons
-import { configScreenStyles as styles } from "@/styles/configScreenStyles";
+import { configScreenStyles as styles } from "@/styles/screen/settings/configScreenStyles";
 
 interface ConfigSectionProps {
   iconName: keyof typeof Ionicons.glyphMap; // Nombre de icono de Ionicons

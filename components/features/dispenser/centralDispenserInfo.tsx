@@ -5,9 +5,9 @@ import { View, Text, Pressable } from "react-native";
 // Importamos los íconos de Expo
 import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 // 🔥 Importamos los estilos específicos para este componente
-import { centralDispenserInfoStyles as styles } from "@/styles/centralDispenserInfoStyles";
+import { centralDispenserInfoStyles as styles } from "@/styles/screen/dispenser/centralDispenserInfoStyles";
 // Importamos AppColors para darle color a los íconos
-import { AppColors } from "@/styles/theme";
+import { AppColors } from "@/styles/global/theme";
 
 interface CentralDispenserInfoProps {
   name: string;

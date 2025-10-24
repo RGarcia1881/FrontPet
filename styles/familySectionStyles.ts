@@ -1,7 +1,7 @@
 // styles/familySectionStyles.ts
 
 import { StyleSheet } from 'react-native';
-import { AppColors, AppFonts } from '@/styles/theme'; 
+import { AppColors, AppFonts } from '@/styles/global/theme'; 
 
 export const styles = StyleSheet.create({
     sectionContainer: {

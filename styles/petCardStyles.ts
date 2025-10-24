@@ -1,7 +1,7 @@
 // styles/petCardStyles.ts
 
 import { StyleSheet } from 'react-native';
-import { AppColors, AppFonts } from '@/styles/theme'; 
+import { AppColors, AppFonts } from '@/styles/global/theme'; 
 
 export const styles = StyleSheet.create({
     // Contenedor de la tarjeta (con sombra y bordes redondeados)

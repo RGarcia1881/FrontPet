@@ -14,7 +14,7 @@ import Animated, {
   WithTimingConfig,
   useSharedValue,
 } from "react-native-reanimated";
-import { dispenserScreenStyles as styles } from "@/styles/dispenserScreenStyles";
+import { dispenserScreenStyles as styles } from "@/styles/screen/dispenser/dispenserScreenStyles";
 import { DispenserVisuals } from "./dispenserVisuals";
 
 // --- TIPOS (Sin cambios) ---

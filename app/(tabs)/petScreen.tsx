@@ -2,7 +2,7 @@
 
 import React from "react";
 import { SafeAreaView, ScrollView, View, Text } from "react-native";
-import { PetScene } from "@/components/ui/petScene";
+import { PetScene } from "@/components/features/pet/petScene";
 import { petsScreenStyles as styles } from "@/styles/petScreenStyles";
 
 export default function PetsScreen() {

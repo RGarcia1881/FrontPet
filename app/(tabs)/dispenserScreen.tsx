@@ -2,9 +2,9 @@
 
 import React from "react";
 import { View, Text, ScrollView, SafeAreaView, Pressable } from "react-native";
-import { dispenserScreenStyles as styles } from "@/styles/dispenserScreenStyles";
-import { CentralDispenserInfo } from "@/components/ui/centralDispenserInfo";
-import { AnimatedDispenser } from "@/components/ui/animatedDispenser";
+import { dispenserScreenStyles as styles } from "@/styles/screen/dispenser/dispenserScreenStyles";
+import { CentralDispenserInfo } from "@/components/features/dispenser/centralDispenserInfo";
+import { AnimatedDispenser } from "@/components/features/dispenser/animatedDispenser";
 
 // --- DATOS INICIALES ---
 const DISPENSERS_DATA = [

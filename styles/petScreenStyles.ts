@@ -1,7 +1,7 @@
 // styles/petsScreenStyles.ts
 
 import { StyleSheet, Dimensions } from 'react-native';
-import { AppColors, AppFonts } from '@/styles/theme';
+import { AppColors, AppFonts } from '@/styles/global/theme';
 
 const { width, height } = Dimensions.get('window');
 

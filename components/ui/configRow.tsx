@@ -8,7 +8,7 @@ import {
   ImageSourcePropType,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // 🔥 Usando Ionicons
-import { configScreenStyles as styles } from "@/styles/configScreenStyles";
+import { configScreenStyles as styles } from "@/styles/screen/settings/configScreenStyles";
 
 interface ConfigRowProps {
   // Ahora el nombre del icono debe ser un nombre válido de Ionicons

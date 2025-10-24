@@ -2,7 +2,7 @@
 
 import { StyleSheet } from 'react-native';
 // Asegúrate de que esta ruta sea correcta para tus constantes
-import { AppColors, AppFonts } from '@/styles/theme';
+import { AppColors, AppFonts } from '@/styles/global/theme';
 
 export const dispenserVisualsStyles = StyleSheet.create({
     // Contenedor que agrupará la imagen y los niveles de llenado

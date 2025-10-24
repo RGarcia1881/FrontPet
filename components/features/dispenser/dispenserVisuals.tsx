@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 // Importamos el componente de animación (Asume la ruta correcta)
-import { AnimatedLevel } from "@/components/ui/animatedLevel";
-import { AppColors } from "@/styles/theme";
+import { AnimatedLevel } from "@/components/features/dispenser/animatedLevel";
+import { AppColors } from "@/styles/global/theme";
 // 🔥 Importamos los estilos específicos para este componente
 import { dispenserVisualsStyles as styles } from "@/styles/dispenserVisualsStyles";
 

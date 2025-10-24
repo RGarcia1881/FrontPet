@@ -1,5 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
-import { AppColors, AppFonts } from '@/styles/theme';
+import { AppColors, AppFonts } from '@/styles/global/theme';
 
 const colors = {
 primaryBlue: '#85aac3',

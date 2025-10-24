@@ -2,7 +2,7 @@
 
 import { StyleSheet } from 'react-native';
 // Asegúrate de que esta ruta sea correcta
-import { AppColors, AppFonts } from '@/styles/theme';
+import { AppColors, AppFonts } from '@/styles/global/theme';
 
 // --- CONSTANTES ---
 const ICON_SIZE = 30;

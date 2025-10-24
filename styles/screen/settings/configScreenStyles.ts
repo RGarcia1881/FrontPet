@@ -1,7 +1,7 @@
 // styles/configScreenStyles.ts
 
 import { StyleSheet, Dimensions, Platform } from 'react-native';
-import { AppColors, AppFonts } from '@/styles/theme'; // Ajusta la ruta
+import { AppColors, AppFonts } from '@/styles/global/theme'; // Ajusta la ruta
 
 const { width } = Dimensions.get('window');
 

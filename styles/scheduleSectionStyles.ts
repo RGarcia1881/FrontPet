@@ -1,7 +1,7 @@
 // scheduleSectionStyles.ts
 
 import { StyleSheet } from 'react-native';
-import { AppColors, AppFonts } from '@/styles/theme';
+import { AppColors, AppFonts } from '@/styles/global/theme';
 import { useTheme } from '@react-navigation/native';
 
 const colors = {

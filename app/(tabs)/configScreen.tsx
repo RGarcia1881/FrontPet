@@ -4,7 +4,7 @@ import React from "react";
 import { SafeAreaView, ScrollView, Text, View } from "react-native";
 // 🔥 Importación de FontAwesome 5 (asumiendo que tus componentes internos la usan)
 // Eliminamos la importación mixta de Ionicons y FontAwesome
-import { configScreenStyles as styles } from "@/styles/configScreenStyles";
+import { configScreenStyles as styles } from "@/styles/screen/settings/configScreenStyles";
 import { ConfigSection } from "@/components/ui/configSection";
 import { ConfigRow } from "@/components/ui/configRow";
 

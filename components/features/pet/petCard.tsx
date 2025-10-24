@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { styles } from "@/styles/petCardStyles";
-import { AppColors } from "@/styles/theme";
+import { AppColors } from "@/styles/global/theme";
 
 interface PetCardProps {
   name: string;

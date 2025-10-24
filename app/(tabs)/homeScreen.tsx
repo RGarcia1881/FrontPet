@@ -1,22 +1,35 @@
-// homeScreen.tsx (VERSIÓN FUNCIONAL CON ANIMACIONES)
-
 import React from "react";
 import { View, StyleSheet, SafeAreaView } from "react-native";
-import { AppColors } from "@/styles/theme";
+import { AppColors } from "@/styles/global/theme";
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
 } from "react-native-reanimated";
 
 // Componentes de la UI
-import { HeaderComponent } from "@/components/ui/headerComponent";
-import { ScheduleSection } from "@/components/ui/scheduleSection";
-import { DispenserSection } from "@/components/ui/dipenserSection";
-import { NewPetCard } from "@/components/ui/newPetCard";
-import { FamilySection } from "@/components/ui/familySection";
+import { HeaderComponent } from "@/components/home/headerComponent"; // Manteniendo tu ruta actual para Header
+import { ScheduleSection } from "@/components/features/schedule/scheduleSection";
+
+// 🔥 CORRECCIÓN DE LA RUTA: 'dipenserSection' -> 'dispenserSection'
+import { DispenserSection } from "@/components/features/dispenser/dipenserSection";
+import { NewPetCard } from "@/components/features/pet/newPetCard";
+import { FamilySection } from "@/components/features/pet/familySection";
 
 // Componente de Animación
 import { ScrollRevealView } from "@/components/ui/scrollRevealView";
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    // 🔥 2. ASIGNACIÓN DEL FONDO SÓLIDO
+    backgroundColor: AppColors.light,
+  },
+  contentContainer: {
+    paddingBottom: 20,
+    // (Opcional) Asegura el fondo también en el contentContainer por si acaso
+    backgroundColor: AppColors.light,
+  },
+});
 
 export default function HomeScreen() {
   // 1. Inicialización de la posición de scroll vertical
@@ -69,16 +82,3 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // 🔥 2. ASIGNACIÓN DEL FONDO SÓLIDO
-    backgroundColor: AppColors.light,
-  },
-  contentContainer: {
-    paddingBottom: 20,
-    // (Opcional) Asegura el fondo también en el contentContainer por si acaso
-    backgroundColor: AppColors.light,
-  },
-});

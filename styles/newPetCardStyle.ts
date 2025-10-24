@@ -1,7 +1,7 @@
 // styles/newPetCardStyles.ts (CORREGIDO y OPTIMIZADO)
 
 import { StyleSheet } from 'react-native';
-import { AppColors, AppFonts } from '@/styles/theme'; 
+import { AppColors, AppFonts } from '@/styles/global/theme'; 
 
 export const styles = StyleSheet.create({
     cardContainer: {

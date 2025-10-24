@@ -1,5 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
-import { AppColors, AppFonts } from '@/styles/theme';
+import { AppColors, AppFonts } from '@/styles/global/theme';
 
 
 const colors = {
@@ -16,6 +16,8 @@ container: {
 flex: 1,
 backgroundColor: AppColors.light,
 },
+
+
 // Estilo para el contenido principal (donde irá el resto de la app)
 content: {
 paddingHorizontal: 0,
