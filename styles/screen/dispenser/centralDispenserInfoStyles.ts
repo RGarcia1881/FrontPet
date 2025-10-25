@@ -1,12 +1,10 @@
-// styles/centralDispenserInfoStyles.ts
-
 import { StyleSheet } from 'react-native';
 // Asegúrate de que esta ruta sea correcta
 import { AppColors, AppFonts } from '@/styles/global/theme';
 
 // --- CONSTANTES ---
 const ICON_SIZE = 30;
-const BLUE_GREY = '#6A8BAB'; // Color de fondo del círculo central
+// const BLUE_GREY = '#6A8BAB'; // No se usa, se elimina
 
 export const centralDispenserInfoStyles = StyleSheet.create({
     // --- CÍRCULO DE INFORMACIÓN CENTRAL ---
@@ -20,6 +18,12 @@ export const centralDispenserInfoStyles = StyleSheet.create({
         alignItems: 'center', // Centra el contenido (texto) horizontalmente
         padding: 20,
         position: 'relative', // CLAVE: para posicionar los íconos internos de forma absoluta
+        // Aseguramos que el botón Añadir se vea bien con la sombra del círculo principal
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 8,
     },
     
     // Texto de información general
@@ -58,8 +62,6 @@ export const centralDispenserInfoStyles = StyleSheet.create({
         width: ICON_SIZE,
         height: ICON_SIZE,
         // El color del ícono se controla en el componente con tintColor (o el prop 'color' de Ionicons),
-        // pero este estilo asegura su tamaño si usas Image.
-        // Si usas @expo/vector-icons, el prop 'size' y 'color' es más directo.
     },
     
     // Posición para los íconos superiores (Edit/Delete)
@@ -70,5 +72,26 @@ export const centralDispenserInfoStyles = StyleSheet.create({
     // Posición para los íconos inferiores (View/Sound)
     bottomIcons: {
         bottom: 35, 
+    },
+
+    // --- NUEVOS ESTILOS PARA EL BOTÓN GRANDE DE AÑADIR (id: 99) ---
+    bigAddButton: {
+        justifyContent: "center",
+        alignItems: "center",
+        // Hacemos el círculo un poco más pequeño que el contenedor principal
+        width: 140, 
+        height: 140,
+        borderRadius: 999,
+        backgroundColor: AppColors.light, // Fondo claro para el botón '+'
+        borderWidth: 3,
+        borderColor: AppColors.primary,
+    },
+    addText: {
+        color: AppColors.primary, // Texto del botón Añadir en color primario
+        fontFamily: AppFonts.primary,
+        fontWeight: '600',
+        fontSize: 14,
+        marginTop: 5,
+        textAlign: "center",
     },
 });

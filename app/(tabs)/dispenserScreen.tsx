@@ -1,13 +1,26 @@
-// app/(tabs)/dispenserScreen.tsx
-
 import React from "react";
 import { View, Text, ScrollView, SafeAreaView, Pressable } from "react-native";
 import { dispenserScreenStyles as styles } from "@/styles/screen/dispenser/dispenserScreenStyles";
 import { CentralDispenserInfo } from "@/components/features/dispenser/centralDispenserInfo";
 import { AnimatedDispenser } from "@/components/features/dispenser/animatedDispenser";
 
-// --- DATOS INICIALES ---
-const DISPENSERS_DATA = [
+// --- TIPOS CORREGIDOS (Solo 4 posiciones) ---
+type DispenserPosition = "top" | "right" | "bottom" | "left";
+
+interface DispenserData {
+  id: number;
+  name: string;
+  location: string;
+  status: string;
+  waterLevel: number;
+  foodLevel: number;
+  isConnected: boolean;
+  hasPower: boolean;
+  position: DispenserPosition;
+}
+
+// --- DATOS INICIALES (3 DISPENSADORES + BOTÓN AÑADIR) ---
+const DISPENSERS_DATA: DispenserData[] = [
   {
     id: 1,
     name: "Disp. 1 (Sala)",
@@ -17,7 +30,7 @@ const DISPENSERS_DATA = [
     foodLevel: 30,
     isConnected: true,
     hasPower: true,
-    position: "center",
+    position: "top", // FOCO INICIAL
   },
   {
     id: 2,
@@ -50,14 +63,14 @@ const DISPENSERS_DATA = [
     foodLevel: 0,
     isConnected: true,
     hasPower: true,
-    position: "add",
+    position: "left", // Botón Añadir en la última posición periférica disponible
   },
 ];
 
 export default function DispenserScreen() {
+  // El dispensador principal es ahora el que está en "top"
   const [dispensers, setDispensers] = React.useState(DISPENSERS_DATA);
-  // Ahora mainDispenser puede ser el ID 99
-  const mainDispenser = dispensers.find((d) => d.position === "center");
+  const mainDispenser = dispensers.find((d) => d.position === "top");
 
   // Funciones de acción
   const handleEdit = () =>
@@ -69,70 +82,118 @@ export default function DispenserScreen() {
   const handleSound = () =>
     console.log(`Activar sonido en Dispensador ${mainDispenser?.id}`);
 
-  // 🔥 handleAdd ahora es una función que solo se llamará desde AnimatedDispenser
-  const handleAdd = () =>
-    console.log("Añadir nuevo dispensador (Activado desde el centro)");
+  // Acción de Añadir
+  const handleAdd = () => {
+    console.log(
+      "Añadir nuevo dispensador (Activado desde la posición de Foco)"
+    );
+  };
+
+  // --- LÓGICA DE ROTACIÓN CONDICIONAL (4 POSICIONES PERIFÉRICAS) ---
+
+  // Las 4 posiciones son periféricas entre sí, pero una de ellas ('top') es el foco visual
+  type PositionKey = DispenserPosition;
+
+  // 🔥 Secuencia de Rotación Horaria (Clockwise)
+  // left -> top -> right -> bottom -> left
+  const CLOCKWISE_SEQUENCE: Record<PositionKey, PositionKey> = {
+    top: "right",
+    right: "bottom",
+    bottom: "left",
+    left: "top",
+  };
+
+  // 🔥 Secuencia de Rotación Antihoraria (Counter-Clockwise)
+  // right -> top -> left -> bottom -> right
+  const COUNTER_CLOCKWISE_SEQUENCE: Record<PositionKey, PositionKey> = {
+    top: "left",
+    left: "bottom",
+    bottom: "right",
+    right: "top",
+  };
+
+  /**
+   * Determina la secuencia de rotación basándose en la posición del dispensador seleccionado.
+   * @param selectedPosition Posición del elemento clickeado.
+   * @returns La secuencia de rotación a aplicar.
+   */
+  const getRotationSequence = (selectedPosition: PositionKey) => {
+    // REGLA: DISP DERECHO HORARIO, DISP IZQ ANTIHORARIO
+    if (selectedPosition === "right" || selectedPosition === "bottom") {
+      // Clic en RIGHT o BOTTOM rota en sentido HORARIO (los ítems se mueven Clockwise)
+      return CLOCKWISE_SEQUENCE;
+    }
+
+    // Clic en LEFT rota en sentido ANTIHORARIO (los ítems se mueven Counter-Clockwise)
+    return COUNTER_CLOCKWISE_SEQUENCE;
+  };
 
   // LÓGICA DE ROTACIÓN CIRCULAR (TODO GIRA)
   const handleSelectDispenser = (selectedId: number) => {
-    // 🔥 ELIMINAMOS la condición 'if (selectedId === 99) { return handleAdd(); }'
-    // para que el ID 99 pueda rotar al centro.
-
     setDispensers((prevDispensers) => {
-      const currentCenter = prevDispensers.find((d) => d.position === "center");
+      // El foco es el que está en 'top'
+      const currentFocus = prevDispensers.find((d) => d.position === "top");
       const selectedDispenser = prevDispensers.find((d) => d.id === selectedId);
 
       if (
-        !currentCenter ||
+        !currentFocus ||
         !selectedDispenser ||
-        selectedId === currentCenter.id
+        selectedId === currentFocus.id // Si ya está en el foco, no hacer nada
       ) {
         return prevDispensers;
       }
 
-      // Orden de rotación: Derecha -> Abajo -> Izquierda (Add) -> Derecha
-      const rotationSequence = {
-        right: "bottom",
-        bottom: "add",
-        add: "right",
-      };
+      // La posición del dispensador clicado (ej: "left", "right", "bottom")
+      const positionSelected = selectedDispenser.position as PositionKey;
 
-      // Posición a la que se moverá el antiguo centro
-      const positionSelectedLeft = selectedDispenser.position as
-        | "right"
-        | "bottom"
-        | "add";
-      const targetPositionForOldCenter = rotationSequence[positionSelectedLeft];
-
-      return prevDispensers.map((d) => {
+      // 1. EL INTERCAMBIO
+      const updatedDispensers = prevDispensers.map((d) => {
         if (d.id === selectedId) {
-          // 1. El seleccionado (incluyendo el ID 99) va al centro
-          return { ...d, position: "center" };
-        } else if (d.id === currentCenter.id) {
-          // 2. El antiguo centro rota al siguiente spot en la secuencia
-          return { ...d, position: targetPositionForOldCenter };
-        } else if (d.position !== "center") {
-          // 3. Los otros dos periféricos rotan una posición
-          const newPosition =
-            rotationSequence[d.position as "right" | "bottom" | "add"];
-          return { ...d, position: newPosition || d.position };
+          // El dispensador clicado se mueve al "top" (foco)
+          return { ...d, position: "top" as PositionKey };
+        } else if (d.id === currentFocus.id) {
+          // El antiguo dispensador del "top" se mueve al slot que dejó el seleccionado
+          return { ...d, position: positionSelected };
+        }
+        return d;
+      });
+
+      // 2. LA ROTACIÓN DE LOS OTROS 2 PERIFÉRICOS
+      const nonRotatingPeripheralId = currentFocus.id; // El que acaba de salir del foco
+
+      // Obtenemos la secuencia de rotación
+      const sequence = getRotationSequence(positionSelected);
+
+      return updatedDispensers.map((d) => {
+        // Rotar solo si:
+        // a) Es un dispensador periférico (no está en "top")
+        // b) NO es el dispensador que acaba de moverse del foco a un slot periférico (currentFocus.id)
+        if (
+          d.position !== "top" &&
+          d.id !== selectedId &&
+          d.id !== nonRotatingPeripheralId
+        ) {
+          const oldPosition = d.position as PositionKey;
+          const newPosition = sequence[oldPosition]; // Avanza un paso
+          return { ...d, position: newPosition };
         }
         return d;
       });
     });
   };
 
-  // Props del círculo central
+  // Props del círculo central (fijo en la pantalla)
   const centralInfoProps = mainDispenser
     ? {
         name: mainDispenser.name,
         location: mainDispenser.location,
         status: mainDispenser.status,
-        onEdit: handleEdit,
-        onDelete: handleDelete,
-        onView: handleView,
-        onSound: handleSound,
-        // Pasamos handleAdd solo si el dispensador central es el botón '+'
+        // Las acciones se pasan si NO es el botón Añadir
+        onEdit: mainDispenser.id !== 99 ? handleEdit : undefined,
+        onDelete: mainDispenser.id !== 99 ? handleDelete : undefined,
+        onView: mainDispenser.id !== 99 ? handleView : undefined,
+        onSound: mainDispenser.id !== 99 ? handleSound : undefined,
+        // La acción de Añadir se pasa solo si ES el botón '+'
         onAddClick: mainDispenser.id === 99 ? handleAdd : undefined,
       }
     : null;
@@ -156,8 +217,7 @@ export default function DispenserScreen() {
           {dispensers.map((disp) => (
             <AnimatedDispenser
               key={disp.id}
-              dispenser={disp}
-              // Usaremos esta función para rotar, no para ejecutar handleAdd
+              dispenser={disp as any}
               onSelect={handleSelectDispenser}
             />
           ))}
@@ -166,7 +226,7 @@ export default function DispenserScreen() {
         {/* 3. Contenedor Circular Principal (Elementos Fijos) */}
         <View style={styles.circularContainer}>
           {/* CÍRCULO DE INFORMACIÓN CENTRAL */}
-          {/* 🔥 Pasamos 'onAddClick' al CentralDispenserInfo */}
+          {/* Muestra la información del dispensador que está en el slot 'top' */}
           {centralInfoProps && <CentralDispenserInfo {...centralInfoProps} />}
         </View>
       </ScrollView>

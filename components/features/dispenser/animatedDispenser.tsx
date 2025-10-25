@@ -1,23 +1,18 @@
-// components/ui/AnimatedDispenser.tsx
-
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
   Image,
   Pressable,
   useWindowDimensions,
+  Animated, // Usamos la librería Animated estándar
 } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  withTiming,
-  WithTimingConfig,
-  useSharedValue,
-} from "react-native-reanimated";
 import { dispenserScreenStyles as styles } from "@/styles/screen/dispenser/dispenserScreenStyles";
 import { DispenserVisuals } from "./dispenserVisuals";
 
-// --- TIPOS (Sin cambios) ---
+// --- TIPOS CORREGIDOS (Solo 4 posiciones) ---
+type DispenserPosition = "top" | "right" | "bottom" | "left";
+
 interface DispenserData {
   id: number;
   name: string;
@@ -27,7 +22,7 @@ interface DispenserData {
   foodLevel: number;
   isConnected: boolean;
   hasPower: boolean;
-  position: "center" | "right" | "bottom" | "add";
+  position: DispenserPosition;
 }
 interface AnimatedDispenserProps {
   dispenser: DispenserData;
@@ -36,27 +31,23 @@ interface AnimatedDispenserProps {
 
 const DISPENSER_SMALL_GRAPHIC = require("@/assets/images/Dispensador.png");
 
-// 🔑 DEFINICIÓN DE POSICIONES Y COORDENADAS CARTESIANAS
+// 🔑 DEFINICIÓN DE POSICIONES Y COORDENADAS (4 SLOTS EXACTOS)
 const getPositions = (width: number) => {
-  const CIRCULAR_CONTAINER_SIZE = width * 0.9;
-
-  // R: Distancia desde el centro (0,0) a los íconos pequeños.
-  // Ajusta el '30' si el giro no se alinea con tu diseño.
-  const R = CIRCULAR_CONTAINER_SIZE / 2 + 30;
-
   return {
-    center: { x: 0, y: 10, scale: 1.0, zIndex: 10 },
+    // FOCO (GRANDE) - Coordenada que llamaste 'top' / 'Centro'
+    top: { x: -120, y: -100, scale: 1.0, zIndex: 10 },
+
+    // PERIFÉRICOS (PEQUEÑOS) - Coordenadas que especificaste
     right: { x: 35, y: 120, scale: 0.8, zIndex: 5 },
     bottom: { x: -125, y: 290, scale: 0.8, zIndex: 5 },
-    add: { x: -285, y: 120, scale: 0.8, zIndex: 5 },
+    left: { x: -285, y: 120, scale: 0.8, zIndex: 5 },
   };
 };
 
-const ANIMATION_CONFIG: WithTimingConfig = { duration: 500 };
+const ANIMATION_DURATION = 500; // Duración en milisegundos
 
 // Componente auxiliar para el contenido del botón (+)
 const AddButtonContent = () => (
-  // Usa el estilo de apariencia visual para el círculo pequeño
   <View style={styles.addButtonVisual}>
     <Text style={styles.addButtonText}>+</Text>
   </View>
@@ -70,38 +61,62 @@ export function AnimatedDispenser({
   const POSITIONS = getPositions(width);
   const target = POSITIONS[dispenser.position];
 
-  // Valores compartidos (estado animable)
-  const currentX = useSharedValue(target.x);
-  const currentY = useSharedValue(target.y);
-  const currentScale = useSharedValue(target.scale);
-  const currentZIndex = useSharedValue(target.zIndex);
+  // VALORES ANIMABLES
+  const currentX = useRef(new Animated.Value(target.x)).current;
+  const currentY = useRef(new Animated.Value(target.y)).current;
+  const currentScale = useRef(new Animated.Value(target.scale)).current;
+  const currentOpacity = useRef(
+    // La opacidad es 1 si está en 'top' (el foco)
+    new Animated.Value(dispenser.position === "top" ? 1 : 0.9)
+  ).current;
 
-  // Efecto de animación
+  // Efecto de animación: Lanza las animaciones cuando la posición cambia
   useEffect(() => {
-    currentX.value = withTiming(target.x, ANIMATION_CONFIG);
-    currentY.value = withTiming(target.y, ANIMATION_CONFIG);
-    currentScale.value = withTiming(target.scale, ANIMATION_CONFIG);
-    currentZIndex.value = target.zIndex;
-  }, [dispenser.position, target]);
+    const newTarget = POSITIONS[dispenser.position];
+
+    const targetX = newTarget.x;
+    const targetY = newTarget.y;
+    const targetScale = newTarget.scale;
+    const targetOpacity = dispenser.position === "top" ? 1 : 0.9;
+
+    Animated.parallel([
+      Animated.timing(currentX, {
+        toValue: targetX,
+        duration: ANIMATION_DURATION,
+        useNativeDriver: true,
+      }),
+      Animated.timing(currentY, {
+        toValue: targetY,
+        duration: ANIMATION_DURATION,
+        useNativeDriver: true,
+      }),
+      Animated.timing(currentScale, {
+        toValue: targetScale,
+        duration: ANIMATION_DURATION,
+        useNativeDriver: true,
+      }),
+      Animated.timing(currentOpacity, {
+        toValue: targetOpacity,
+        duration: ANIMATION_DURATION,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [dispenser.position, width]);
 
   // Estilos animados
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      zIndex: currentZIndex.value,
-      opacity: withTiming(
-        dispenser.position === "center" ? 1 : 0.9,
-        ANIMATION_CONFIG
-      ),
-      transform: [
-        { translateX: currentX.value },
-        { translateY: currentY.value },
-        { scale: currentScale.value },
-      ],
-    };
-  });
+  const animatedStyle = {
+    zIndex: target.zIndex,
+    opacity: currentOpacity,
+    transform: [
+      { translateX: currentX },
+      { translateY: currentY },
+      { scale: currentScale },
+    ],
+  };
 
   // Renderiza el contenido pequeño o el botón '+'
   const renderSmallContent = () => {
+    // El ID 99 es el botón Añadir
     if (dispenser.id === 99) {
       return <AddButtonContent />;
     }
@@ -117,10 +132,14 @@ export function AnimatedDispenser({
     );
   };
 
-  // Renderiza el contenido grande o pequeño
+  // Renderiza el contenido grande (solo si está en "top") o pequeño
   const renderContent = () => {
-    if (dispenser.position === "center") {
-      if (dispenser.id === 99) return null; // Nunca mostrar el '+' en el centro
+    // La posición de FOCO es "top"
+    if (dispenser.position === "top") {
+      // Si el ítem en el foco es el botón '+' (id 99), mostrar solo el AddButtonContent
+      if (dispenser.id === 99) {
+        return renderSmallContent();
+      }
 
       return (
         <DispenserVisuals
@@ -131,24 +150,18 @@ export function AnimatedDispenser({
         />
       );
     }
+    // Si no está en el foco ("top"), siempre mostrar el contenido pequeño
     return renderSmallContent();
   };
 
-  // La posición 'center' no es clickeable
-  if (dispenser.position === "center") {
-    return (
-      <Animated.View style={[styles.dispenserWrapper, animatedStyle]}>
-        {renderContent()}
-      </Animated.View>
-    );
-  }
+  const AnimatedView = Animated.createAnimatedComponent(View);
 
-  // Los periféricos sí son clickeables
+  // Todos los ítems son clickeables (para rotar o para ejecutar la acción central si es el foco)
   return (
     <Pressable onPress={() => onSelect(dispenser.id)}>
-      <Animated.View style={[styles.dispenserWrapper, animatedStyle]}>
+      <AnimatedView style={[styles.dispenserWrapper, animatedStyle as any]}>
         {renderContent()}
-      </Animated.View>
+      </AnimatedView>
     </Pressable>
   );
 }

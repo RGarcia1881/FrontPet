@@ -1,33 +1,23 @@
-// components/ui/DispenserSection.tsx (COMPLETO y MODIFICADO)
-
-import React from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import React, { useRef, useEffect, useState } from "react";
+import { View, Text, TouchableOpacity, Image, Animated } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
+// Asegúrate de que este archivo exista y contenga los estilos correctos
 import { styles } from "@/styles/dispenserSectionStyles";
 import { AppColors } from "@/styles/global/theme";
 
-// 🔥 Importaciones de Reanimated para la lógica de activación
-import Animated, {
-  SharedValue,
-  useAnimatedRef,
-  measure,
-  useSharedValue,
-  useDerivedValue,
-  runOnJS,
-} from "react-native-reanimated";
-
-// Importamos el componente de animación
+// Importamos el componente de animación (ya migrado a Animated)
 import { AnimatedLevel } from "@/components/features/dispenser/animatedLevel";
 
 const DISPENSER_IMAGE = require("@/assets/images/Dispensador.png");
 
-// La interfaz debe ser visible para HomeScreen
+// 🔥 CAMBIO DE TIPO: Ahora acepta Animated.Value, no SharedValue
 export interface DispenserSectionProps {
-  scrollY: SharedValue<number>; // Recibimos el valor compartido del scroll
+  scrollY: Animated.Value;
 }
 
 /**
  * Componente que muestra el dispensador con animación de llenado activada por scroll.
+ * La activación se realiza en el hilo JS al detectar la posición de scroll.
  */
 export function DispenserSection({ scrollY }: DispenserSectionProps) {
   const currentDispenser = {
@@ -38,34 +28,52 @@ export function DispenserSection({ scrollY }: DispenserSectionProps) {
     foodLevel: 20,
   };
 
-  // 🔥 LÓGICA DE ACTIVACIÓN POR SCROLL
-  const dispenserRef = useAnimatedRef<View>(); // Referencia para medir
-  const yPosition = useSharedValue(0); // Posición Y del componente
-  const [shouldAnimateFill, setShouldAnimateFill] = React.useState(false); // Estado de activación
+  // 🔥 LÓGICA DE ACTIVACIÓN POR SCROLL (Hilo JS)
+  const dispenserRef = useRef<View>(null); // Referencia normal para medir
+  const [yPosition, setYPosition] = useState(0); // Posición Y del componente
+  const [shouldAnimateFill, setShouldAnimateFill] = useState(false); // Estado de activación
 
-  // Mide la posición Y del componente (se ejecuta solo una vez al cargar)
+  // 1. Obtener la posición Y del componente después del layout
   const handleLayout = () => {
-    const measurement = measure(dispenserRef);
-    if (measurement) {
-      yPosition.value = measurement.pageY;
+    if (dispenserRef.current) {
+      // Usamos el método measure de la referencia de React para obtener la posición
+      dispenserRef.current.measure((x, y, width, height, pageX, pageY) => {
+        // Guardamos la posición Y relativa a la página
+        setYPosition(pageY);
+      });
     }
   };
 
-  // Se activa una vez que el scroll llega al punto de revelación
-  useDerivedValue(() => {
-    // Definimos el punto de activación: yPosition menos ~400px del viewport.
-    // Esto hace que se active cuando la sección está a mitad de camino en la pantalla.
-    const revealPoint = yPosition.value - 400;
+  // 2. Suscribirse a los cambios de scroll para activar la animación
+  useEffect(() => {
+    let listenerId: string | null = null;
 
-    if (
-      yPosition.value !== 0 &&
-      scrollY.value >= revealPoint &&
-      !shouldAnimateFill
-    ) {
-      // Usamos runOnJS para actualizar el estado en el hilo JS una vez que se cumple la condición
-      runOnJS(setShouldAnimateFill)(true);
+    // Solo si tenemos la posición Y del componente y aún no se ha activado
+    if (yPosition !== 0 && !shouldAnimateFill) {
+      // Añadimos un listener al Animated.Value del scroll
+      listenerId = scrollY.addListener(({ value }) => {
+        // Definimos el punto de activación: yPosition menos ~400px del viewport.
+        // Esto activa la animación cuando la sección está visible.
+        const revealPoint = yPosition - 400;
+
+        if (value >= revealPoint) {
+          // Activamos la animación
+          setShouldAnimateFill(true);
+          // Detenemos el listener para evitar que se ejecute innecesariamente
+          if (listenerId !== null) {
+            scrollY.removeListener(listenerId);
+          }
+        }
+      });
     }
-  });
+
+    // Cleanup: Eliminamos el listener si el componente se desmonta
+    return () => {
+      if (listenerId !== null) {
+        scrollY.removeListener(listenerId);
+      }
+    };
+  }, [yPosition, shouldAnimateFill, scrollY]);
 
   // Funciones dummy se mantienen
   const handleNavigation = (direction: "prev" | "next") => {
@@ -76,12 +84,8 @@ export function DispenserSection({ scrollY }: DispenserSectionProps) {
   };
 
   return (
-    // 🔥 Aplicamos el Ref y onLayout al contenedor principal para medir su posición
-    <View
-      style={styles.container}
-      ref={dispenserRef as any}
-      onLayout={handleLayout}
-    >
+    // 🔥 Aplicamos el Ref normal y onLayout al contenedor principal para medir su posición
+    <View style={styles.container} ref={dispenserRef} onLayout={handleLayout}>
       {/* 1. Header (Mis dispensadores. | Ver dispensadores) */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerText}>Mis dispensadores.</Text>
@@ -106,7 +110,7 @@ export function DispenserSection({ scrollY }: DispenserSectionProps) {
 
           {/* Contenedor principal de la Imagen y los Niveles de Llenado */}
           <View style={styles.dispenserVisualWrapper}>
-            {/* 🔥 NIVEL DE AGUA (AZUL) con animación activada por scroll */}
+            {/* NIVEL DE AGUA (AZUL) con animación activada por scroll */}
             <AnimatedLevel
               level={currentDispenser.waterLevel}
               style={[styles.levelContainer, styles.waterLevel]}
@@ -114,7 +118,7 @@ export function DispenserSection({ scrollY }: DispenserSectionProps) {
               shouldAnimate={shouldAnimateFill} // <-- ¡Prop de activación!
             />
 
-            {/* 🔥 NIVEL DE COMIDA (NARANJA) con animación activada por scroll */}
+            {/* NIVEL DE COMIDA (NARANJA) con animación activada por scroll */}
             <AnimatedLevel
               level={currentDispenser.foodLevel}
               style={[styles.levelContainer, styles.foodLevel]}

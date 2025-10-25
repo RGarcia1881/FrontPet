@@ -1,16 +1,14 @@
-import React from "react";
-import { View, StyleSheet, SafeAreaView } from "react-native";
+import React, { useRef } from "react";
+import { View, StyleSheet, SafeAreaView, Animated } from "react-native";
 import { AppColors } from "@/styles/global/theme";
-import Animated, {
-  useSharedValue,
-  useAnimatedScrollHandler,
-} from "react-native-reanimated";
+// 🔥 Eliminamos importaciones de 'react-native-reanimated'
+// import Animated, { useSharedValue, useAnimatedScrollHandler } from "react-native-reanimated";
 
 // Componentes de la UI
-import { HeaderComponent } from "@/components/home/headerComponent"; // Manteniendo tu ruta actual para Header
+import { HeaderComponent } from "@/components/home/headerComponent";
 import { ScheduleSection } from "@/components/features/schedule/scheduleSection";
 
-// 🔥 CORRECCIÓN DE LA RUTA: 'dipenserSection' -> 'dispenserSection'
+// ✅ CORRECCIÓN DE RUTA: 'dipenserSection' -> 'dispenserSection'
 import { DispenserSection } from "@/components/features/dispenser/dipenserSection";
 import { NewPetCard } from "@/components/features/pet/newPetCard";
 import { FamilySection } from "@/components/features/pet/familySection";
@@ -21,36 +19,53 @@ import { ScrollRevealView } from "@/components/ui/scrollRevealView";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // 🔥 2. ASIGNACIÓN DEL FONDO SÓLIDO
     backgroundColor: AppColors.light,
   },
   contentContainer: {
     paddingBottom: 20,
-    // (Opcional) Asegura el fondo también en el contentContainer por si acaso
     backgroundColor: AppColors.light,
   },
 });
 
-export default function HomeScreen() {
-  // 1. Inicialización de la posición de scroll vertical
-  const scrollY = useSharedValue(0);
+// Usamos Animated.ScrollView, que ya está exportado por 'react-native'
+const AnimatedScrollView = Animated.createAnimatedComponent(
+  require("react-native").ScrollView
+);
 
-  // 2. Handler de scroll para actualizar scrollY
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
+export default function HomeScreen() {
+  // 🔥 1. Inicialización de la posición de scroll vertical
+  // Usamos useRef para mantener la referencia a Animated.Value
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  // 🔥 2. Handler de scroll para actualizar scrollY
+  // Usamos Animated.event() para mapear el evento nativo a scrollY
+  const scrollHandler = Animated.event(
+    [
+      {
+        nativeEvent: {
+          contentOffset: {
+            y: scrollY, // Mapea contentOffset.y al valor de scrollY
+          },
+        },
+      },
+    ],
+    {
+      useNativeDriver: true, // Esto es seguro para el mapeo de scroll
+    }
+  );
+  // NOTA: Con Animated.event, no se necesita el useAnimatedScrollHandler de Reanimated.
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Usamos Animated.ScrollView para capturar el evento de scroll */}
-      <Animated.ScrollView
+      <AnimatedScrollView
         onScroll={scrollHandler}
-        scrollEventThrottle={16} // Fundamental para la fluidez de Reanimated
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.contentContainer}
       >
+        {/* Los componentes ahora reciben Animated.Value, lo cual ya corregimos */}
+
         {/* 1. Header (Sin retraso) */}
         <ScrollRevealView initialDelay={0} startOffset={50} scrollY={scrollY}>
           <HeaderComponent />
@@ -63,22 +78,22 @@ export default function HomeScreen() {
 
         {/* 3. Dispensadores (Retraso de 400ms) */}
         <ScrollRevealView initialDelay={400} startOffset={0} scrollY={scrollY}>
-          {/* Se pasa scrollY para activar la animación de llenado interna */}
+          {/* Pasa el Animated.Value */}
           <DispenserSection scrollY={scrollY} />
         </ScrollRevealView>
 
         {/* 4. Nuevo Integrante (Retraso de 600ms) */}
         <ScrollRevealView initialDelay={600} startOffset={0} scrollY={scrollY}>
-          {/* NewPetCard tiene la animación de pulso interna */}
+          {/* NewPetCard no recibe scrollY, pero ScrollRevealView sí lo necesita */}
           <NewPetCard />
         </ScrollRevealView>
 
         {/* 5. Familia (Retraso de 800ms) */}
         <ScrollRevealView initialDelay={800} startOffset={0} scrollY={scrollY}>
-          {/* Se pasa scrollY para el Stack Reveal vertical y FamilySection lo pasa como trigger */}
+          {/* FamilySection necesita scrollY (ahora Animated.Value) */}
           <FamilySection scrollY={scrollY} />
         </ScrollRevealView>
-      </Animated.ScrollView>
+      </AnimatedScrollView>
     </SafeAreaView>
   );
 }

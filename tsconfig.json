@@ -1,5 +1,6 @@
 {
-  "extends": "expo/tsconfig.base",
+  // 🔥 CORRECCIÓN: Usar la extensión .json explícitamente y asegurar que el preset de Expo esté instalado.
+  "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
     "strict": true,
     "paths": {

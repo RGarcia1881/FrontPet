@@ -1,52 +1,57 @@
-// components/ui/NewPetCard.tsx (CORREGIDO con Animación de Pulso)
+import React, { useEffect, useRef } from "react";
+import { View, Text, TouchableOpacity, Animated, Easing } from "react-native";
+// 🔥 Eliminamos importaciones de 'react-native-reanimated'
+// import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, Easing } from "react-native-reanimated";
 
-import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
-// 🔥 Importaciones de Reanimated
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withRepeat,
-  Easing,
-} from "react-native-reanimated";
-
-import { styles } from "@/styles/newPetCardStyle"; // Asegura que el alias funcione
+import { styles } from "@/styles/newPetCardStyle";
 
 // Importa tu imagen del perro
 const NEW_PET_IMAGE = require("@/assets/images/Doggy.png");
+
+// Creamos un componente Animated.Image
+const AnimatedImage = Animated.createAnimatedComponent(Animated.Image);
 
 /**
  * Componente que muestra la tarjeta para agregar un nuevo integrante/mascota.
  */
 export function NewPetCard() {
-  // 🔥 1. Valor compartido para la escala de la imagen del perro
-  const scale = useSharedValue(1);
+  // 🔥 1. Valor Animated para la escala
+  const scale = useRef(new Animated.Value(1)).current;
 
-  // 🔥 2. Ejecutamos la animación de pulso al montar el componente
+  // 🔥 2. Función para iniciar el pulso infinito
+  const startPulse = () => {
+    // Primera animación: Escalar a 1.05
+    const animateToLarge = Animated.timing(scale, {
+      toValue: 1.05,
+      duration: 600, // La mitad de la duración total del ciclo (1200ms)
+      easing: Easing.inOut(Easing.quad),
+      useNativeDriver: true,
+    });
+
+    // Segunda animación: Escalar de vuelta a 1.0
+    const animateToSmall = Animated.timing(scale, {
+      toValue: 1,
+      duration: 600, // La otra mitad
+      easing: Easing.inOut(Easing.quad),
+      useNativeDriver: true,
+    });
+
+    // Encadenamos las dos animaciones y las repetimos en loop
+    Animated.loop(Animated.sequence([animateToLarge, animateToSmall])).start();
+  };
+
+  // 🔥 3. Ejecutamos la animación de pulso al montar el componente
   useEffect(() => {
-    // La animación de pulso se repite infinitamente
-    scale.value = withRepeat(
-      withTiming(1.05, {
-        // Pulso a 1.05 veces el tamaño original
-        duration: 1200, // Duración del pulso (ida y vuelta)
-        easing: Easing.inOut(Easing.quad), // Easing suave
-      }),
-      -1, // -1 para repetir infinitamente
-      true // true para que la animación se revierta (1.05 -> 1.0)
-    );
-  }, []); // El array vacío asegura que se ejecute solo una vez al montar
+    startPulse();
+  }, []);
 
-  // 🔥 3. Estilo animado que aplica la escala
-  const animatedPetImageStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
+  // 🔥 4. Estilo animado que aplica la escala (usando la Animated.Value)
+  const animatedPetImageStyle = {
+    transform: [{ scale: scale }],
+  };
 
   const handleAddPet = () => {
     console.log("Navegar a la pantalla para agregar una nueva mascota.");
-    // Aquí iría la navegación a 'create.tsx' o 'createUser.tsx' según tu estructura
   };
 
   return (
@@ -65,7 +70,7 @@ export function NewPetCard() {
       </View>
 
       {/* 🔥 Imagen del Perro con animación de pulso */}
-      <Animated.Image // Cambiamos Image por Animated.Image
+      <AnimatedImage
         source={NEW_PET_IMAGE}
         style={[styles.petImage, animatedPetImageStyle]} // Aplicamos el estilo animado
         alt="Perro sonriente"

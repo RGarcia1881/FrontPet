@@ -1,17 +1,11 @@
-// components/ui/FamilySection.tsx (MODIFICADO para scrollX)
-
-import React from "react";
-import { View, Text, ScrollView } from "react-native";
+import React, { useRef } from "react";
+import { View, Text, ScrollView, Animated } from "react-native";
 import { styles } from "@/styles/familySectionStyles";
-import { SharedValue } from "react-native-reanimated";
+// 🔥 Eliminamos importaciones de 'react-native-reanimated'
+// import { SharedValue } from "react-native-reanimated";
+// import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
 
-// 🔥 Importaciones de Reanimated para el scroll horizontal
-import Animated, {
-  useAnimatedScrollHandler,
-  useSharedValue,
-} from "react-native-reanimated";
-
-// Importamos el componente animado
+// Importamos el componente animado (ahora usa Animated.Value)
 import { AnimatedPetCard } from "./animatedPetCard";
 
 const PET_DATA = [
@@ -36,30 +30,43 @@ const PET_DATA = [
 ];
 
 interface FamilySectionProps {
-  scrollY: SharedValue<number>; // Mantenemos este para el ScrollReveal de la sección
+  // Ahora es Animated.Value, no SharedValue
+  scrollY: Animated.Value;
 }
+
+// Creamos un componente Animated.ScrollView para usar el sistema Animated.event
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export function FamilySection({ scrollY }: FamilySectionProps) {
   const handleCardPress = (petName: string) => {
     console.log(`Ver detalles de la mascota: ${petName}`);
   };
 
-  // 🔥 NUEVO: Valor compartido para el scroll horizontal
-  const scrollX = useSharedValue(0);
+  // 🔥 NUEVO: Inicialización de la posición de scroll horizontal con useRef
+  const scrollX = useRef(new Animated.Value(0)).current;
 
-  // 🔥 NUEVO: Handler para el scroll horizontal
-  const scrollXHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollX.value = event.contentOffset.x;
-    },
-  });
+  // 🔥 NUEVO: Handler para el scroll horizontal usando Animated.event()
+  const scrollXHandler = Animated.event(
+    [
+      {
+        nativeEvent: {
+          contentOffset: {
+            x: scrollX, // Mapea contentOffset.x al valor de scrollX
+          },
+        },
+      },
+    ],
+    {
+      useNativeDriver: true, // Esto es seguro para el mapeo de scroll
+    }
+  );
 
   return (
     <View style={styles.sectionContainer}>
       <Text style={styles.title}>Esta es tu familia</Text>
 
-      {/* 🔥 Usamos Animated.ScrollView para el carrusel horizontal */}
-      <Animated.ScrollView // Cambiamos a Animated.ScrollView
+      {/* 🔥 Usamos AnimatedScrollView */}
+      <AnimatedScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.carousel}
@@ -69,14 +76,14 @@ export function FamilySection({ scrollY }: FamilySectionProps) {
         {PET_DATA.map((pet, index) => (
           <AnimatedPetCard
             key={pet.id}
-            scrollY={scrollY} // Seguimos pasando este para el reveal vertical
-            scrollX={scrollX} // 🔥 NUEVO: Pasamos el scroll horizontal
+            scrollY={scrollY} // Se sigue pasando el scroll vertical
+            scrollX={scrollX} // Pasamos el Animated.Value horizontal
             index={index}
             petData={pet}
             onPress={() => handleCardPress(pet.name)}
           />
         ))}
-      </Animated.ScrollView>
+      </AnimatedScrollView>
     </View>
   );
 }
