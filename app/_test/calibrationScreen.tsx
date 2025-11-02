@@ -11,7 +11,7 @@ import {
   handleCalibrateTare,
   handleCalibrateSetWeight,
 } from "@/handlers/esp32Handlers";
-import { calibrationStyles as styles } from "@/styles/calibrationStyles";
+import { calibrationStyles as styles } from "@/styles/_test/calibrationStyles";
 
 export default function CalibrationScreen() {
   const [step, setStep] = useState(0);

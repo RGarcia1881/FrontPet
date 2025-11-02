@@ -79,13 +79,12 @@ export const petsScreenStyles = StyleSheet.create({
         fontSize: 12,
         fontFamily: AppFonts.primary,
     },
-    
-    // --- Posicionamiento de las Mascotas ---
     petPosition1: {
         top: '55%', 
         left: '14%',
         scale: 1.1,
     },
+
     petPosition3: {
         top: '95%', 
         left: '30%',

@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { esp32Styles as styles } from "@/styles/esp32Styles";
+import { esp32Styles as styles } from "@/styles/_test/esp32Styles";
 import {
   handleReadSensor,
   handleActivateMotor,

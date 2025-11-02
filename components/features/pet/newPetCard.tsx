@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Animated, Easing } from "react-native";
 // 🔥 Eliminamos importaciones de 'react-native-reanimated'
 // import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, Easing } from "react-native-reanimated";
 
-import { styles } from "@/styles/newPetCardStyle";
+import { styles } from "@/styles/screen/pets/newPetCardStyle";
 
 // Importa tu imagen del perro
 const NEW_PET_IMAGE = require("@/assets/images/Doggy.png");

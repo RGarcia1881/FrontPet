@@ -9,7 +9,7 @@ import {
   ImageSourcePropType,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { styles } from "@/styles/petCardStyles";
+import { styles } from "@/styles/screen/pets/petCardStyles";
 import { AppColors } from "@/styles/global/theme";
 
 interface PetCardProps {

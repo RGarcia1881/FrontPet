@@ -7,7 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AnimatedLevel } from "@/components/features/dispenser/animatedLevel";
 import { AppColors } from "@/styles/global/theme";
 // 🔥 Importamos los estilos específicos para este componente
-import { dispenserVisualsStyles as styles } from "@/styles/dispenserVisualsStyles";
+import { dispenserVisualsStyles as styles } from "@/styles/screen/dispenser/dispenserVisualsStyles";
 
 const DISPENSER_IMAGE = require("@/assets/images/Dispensador.png");
 

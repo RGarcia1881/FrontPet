@@ -5,7 +5,7 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 // La importación de la lógica usa tu alias '@/utils'
 import { getGreetingAndImage } from "@/utils/greetingLogic";
 // Asumiendo que has puesto los estilos aquí.
-import { styles } from "@/styles/scheduleSectionStyles";
+import { styles } from "@/styles/screen/schedule/scheduleSectionStyles";
 
 // 🐛 CORREGIDO: Declaración de IMAGES limpia
 const IMAGES = {

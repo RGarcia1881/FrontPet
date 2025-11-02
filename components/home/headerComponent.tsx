@@ -7,7 +7,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
 } from "react-native";
-import { headerStyles as styles } from "@/styles/headerComponentStyles";
+import { headerStyles as styles } from "@/styles/screen/home/GeneralUI/headerComponentStyles";
 import { Stack } from "expo-router";
 // Importa un icono, por ejemplo, de una librería o tu SVG local
 // import { DogIcon } from '@/components/DogIcon';

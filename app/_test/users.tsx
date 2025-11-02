@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { getUsers, User } from "@/api/users";
-import { userScreenStyles as styles } from "@/styles/userScreenStyles";
+import { userScreenStyles as styles } from "@/styles/_test/userScreenStyles";
 import {
   handleDeleteUser,
   handleSaveEditUser,

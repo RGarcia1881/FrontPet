@@ -3,7 +3,7 @@
 import React from "react";
 import { View, Image, Text, Pressable } from "react-native";
 // 🔥 Importación corregida para el tipado correcto
-import { petsScreenStyles as styles } from "@/styles/petScreenStyles";
+import { petsScreenStyles as styles } from "@/styles/screen/pets/petScreenStyles";
 
 // Componente para un perro individual
 interface PetProps {

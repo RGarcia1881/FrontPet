@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { createUserStyles as styles } from "@/styles/createUsersStyles";
+import { createUserStyles as styles } from "@/styles/_test/createUsersStyles";
 import { handleSubmit } from "@/handlers/createUserHandlers";
 
 export default function CreateUser() {

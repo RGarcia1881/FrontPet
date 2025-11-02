@@ -8,7 +8,7 @@ import {
   Alert,
   Image,
 } from "react-native";
-import { registerStyles as styles } from "@/styles/registerScreenStyles"; // ⭐️ Importa los estilos de registro
+import { registerStyles as styles } from "@/styles/auth/registerScreenStyles"; // ⭐️ Importa los estilos de registro
 import { Stack } from "expo-router";
 
 /**
@@ -53,7 +53,7 @@ export default function RegisterScreen() {
 
       {/* ScrollView para el formulario (es scrollable) */}
       <ScrollView
-        contentContainerStyle={styles.scrollContainer}
+        contentContainerStyle={styles.viewContainer}
         style={styles.container}
         keyboardShouldPersistTaps="handled"
       >

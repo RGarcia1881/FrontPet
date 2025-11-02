@@ -11,7 +11,7 @@ import {
   SafeAreaView,
 } from "react-native";
 import { getGreetingAndImage } from "@/utils/greetingLogic";
-import { styles } from "@/styles/scheduleScreenStyles";
+import { styles } from "@/styles/screen/schedule/scheduleScreenStyles";
 
 // Mapeo de claves a las imágenes correspondientes (Reemplaza con tus rutas reales)
 const imageMap = {

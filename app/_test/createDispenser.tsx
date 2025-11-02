@@ -12,7 +12,7 @@ import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import { getUsers, User } from "@/api/users";
 import { getPets, Pet } from "@/api/pets";
-import { createDispenserStyles as styles } from "@/styles/createDispenserStyles";
+import { createDispenserStyles as styles } from "@/styles/_test/createDispenserStyles";
 import { handleSubmit } from "@/handlers/createDispenserHandlers";
 
 export default function CreateDispenser() {

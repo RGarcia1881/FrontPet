@@ -11,7 +11,7 @@ import {
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import { getUsers, User } from "@/api/users";
-import { createPetStyles as styles } from "@/styles/createPetsStyles"; // Note: You'll need to update the path
+import { createPetStyles as styles } from "@/styles/_test/createPetsStyles"; // Note: You'll need to update the path
 import { handleSubmit } from "@/handlers/createPetHandlers"; // Note: You'll need to update the path
 
 export default function CreatePet() {

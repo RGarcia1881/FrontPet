@@ -3,7 +3,7 @@
 import React from "react";
 import { SafeAreaView, ScrollView, View, Text } from "react-native";
 import { PetScene } from "@/components/features/pet/petScene";
-import { petsScreenStyles as styles } from "@/styles/petScreenStyles";
+import { petsScreenStyles as styles } from "@/styles/screen/pets/petScreenStyles";
 
 export default function PetsScreen() {
   const handleAddMember = () => {

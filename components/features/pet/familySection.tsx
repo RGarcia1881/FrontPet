@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { View, Text, ScrollView, Animated } from "react-native";
-import { styles } from "@/styles/familySectionStyles";
+import { styles } from "@/styles/screen/pets/familySectionStyles";
 // 🔥 Eliminamos importaciones de 'react-native-reanimated'
 // import { SharedValue } from "react-native-reanimated";
 // import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";

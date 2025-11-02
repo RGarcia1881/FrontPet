@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 import WebView from "react-native-webview";
-import { videoStreamStyles as styles } from "@/styles/videoStreamStyles";
+import { videoStreamStyles as styles } from "@/styles/_test/videoStreamStyles";
 import { VIDEO_STREAM_URL } from "@/api/raspi";
 
 export default function VideoStreamScreen() {

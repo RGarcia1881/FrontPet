@@ -14,7 +14,7 @@ import { Picker } from "@react-native-picker/picker";
 import { getDispensers, Dispenser } from "@/api/dispensers";
 import { getUsers, User } from "@/api/users";
 import { getPets, Pet } from "@/api/pets";
-import { dispenserStyles as styles } from "@/styles/dispenserStyles";
+import { dispenserStyles as styles } from "@/styles/_test/dispenserStyles";
 import {
   handleDeleteDispenser,
   handleSaveEditDispenser,

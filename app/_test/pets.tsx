@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { getPets } from "@/api/pets";
 import { Pet } from "@/types/pet";
-import { petsStyles as styles } from "@/styles/petsStyles";
+import { petsStyles as styles } from "@/styles/_test/petsStyles";
 import { handleDeletePet, handleSaveEditPet } from "@/handlers/petsHandlers";
 
 export default function PetsScreen() {

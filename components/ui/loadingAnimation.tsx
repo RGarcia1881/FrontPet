@@ -5,7 +5,7 @@ import { Svg, Rect } from "react-native-svg";
 import {
   loadingAnimationStyles as styles,
   PRIMARY_COLOR,
-} from "@/styles/loadingAnimationStyles";
+} from "@/styles/auth/loadingAnimationStyles";
 
 // Componente Svg Rect animado
 const AnimatedRect = Animated.createAnimatedComponent(Rect);

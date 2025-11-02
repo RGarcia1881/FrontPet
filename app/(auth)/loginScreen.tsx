@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { loginStyles as styles } from "@/styles/loginScreenStyles";
+import { loginStyles as styles } from "@/styles/auth/loginScreenStyles";
 import { Stack } from "expo-router";
 
 /**
@@ -45,7 +45,7 @@ export default function LoginScreen() {
 
   return (
     <ScrollView
-      contentContainerStyle={styles.scrollContainer}
+      contentContainerStyle={styles.viewContainer}
       style={styles.container}
       keyboardShouldPersistTaps="handled"
     >

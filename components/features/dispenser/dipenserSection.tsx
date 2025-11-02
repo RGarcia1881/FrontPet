@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, Animated } from "react-native";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 // Asegúrate de que este archivo exista y contenga los estilos correctos
-import { styles } from "@/styles/dispenserSectionStyles";
+import { styles } from "@/styles/screen/dispenser/dispenserSectionStyles";
 import { AppColors } from "@/styles/global/theme";
 
 // Importamos el componente de animación (ya migrado a Animated)
