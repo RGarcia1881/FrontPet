@@ -32,7 +32,9 @@ interface AnimatedDispenserProps {
 const DISPENSER_SMALL_GRAPHIC = require("@/assets/images/Dispensador.png");
 
 // 🔑 DEFINICIÓN DE POSICIONES Y COORDENADAS (4 SLOTS EXACTOS)
+// NOTA: Esta función se mantiene sin cambios, define las coordenadas X, Y, y la escala
 const getPositions = (width: number) => {
+  // Las coordenadas X, Y y la escala dependen de la posición
   return {
     // FOCO (GRANDE) - Coordenada que llamaste 'top' / 'Centro'
     top: { x: -120, y: -100, scale: 1.0, zIndex: 10 },
@@ -59,19 +61,19 @@ export function AnimatedDispenser({
 }: AnimatedDispenserProps) {
   const { width } = useWindowDimensions();
   const POSITIONS = getPositions(width);
-  const target = POSITIONS[dispenser.position];
+  const target = POSITIONS[dispenser.position]; // Coordenadas iniciales
 
-  // VALORES ANIMABLES
+  // VALORES ANIMABLES (Inicializados con la posición actual)
   const currentX = useRef(new Animated.Value(target.x)).current;
   const currentY = useRef(new Animated.Value(target.y)).current;
   const currentScale = useRef(new Animated.Value(target.scale)).current;
   const currentOpacity = useRef(
-    // La opacidad es 1 si está en 'top' (el foco)
     new Animated.Value(dispenser.position === "top" ? 1 : 0.9)
   ).current;
 
   // Efecto de animación: Lanza las animaciones cuando la posición cambia
   useEffect(() => {
+    // Obtiene el nuevo objetivo de coordenadas y escala
     const newTarget = POSITIONS[dispenser.position];
 
     const targetX = newTarget.x;
@@ -79,6 +81,7 @@ export function AnimatedDispenser({
     const targetScale = newTarget.scale;
     const targetOpacity = dispenser.position === "top" ? 1 : 0.9;
 
+    // Ejecuta las animaciones en paralelo
     Animated.parallel([
       Animated.timing(currentX, {
         toValue: targetX,
@@ -101,7 +104,7 @@ export function AnimatedDispenser({
         useNativeDriver: true,
       }),
     ]).start();
-  }, [dispenser.position, width]);
+  }, [dispenser.position, width]); // Dependencia clave: dispenser.position
 
   // Estilos animados
   const animatedStyle = {
@@ -154,10 +157,12 @@ export function AnimatedDispenser({
     return renderSmallContent();
   };
 
+  // Crear componente animado de View
   const AnimatedView = Animated.createAnimatedComponent(View);
 
   // Todos los ítems son clickeables (para rotar o para ejecutar la acción central si es el foco)
   return (
+    // Llama a onSelect en el componente padre con el ID del dispensador
     <Pressable onPress={() => onSelect(dispenser.id)}>
       <AnimatedView style={[styles.dispenserWrapper, animatedStyle as any]}>
         {renderContent()}

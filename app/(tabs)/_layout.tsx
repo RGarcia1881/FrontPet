@@ -35,17 +35,55 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      // screenOptions={{
+      //   // Usamos el color definido para mantener la consistencia del tema, o el predeterminado
+      //   tabBarActiveTintColor: activeTintColor,
+      //   headerShown: false,
+      //   tabBarButton: HapticTab,
+
+      //   // 🚨 Comentamos esto por si interfiere con el color blanco
+      //   // tabBarBackground: TabBarBackground,
+
+      //   tabBarStyle: Platform.select({
+      //     ios: {
+      //       position: "absolute",
+      //       // 🔥 APLICACIÓN DEL COLOR BLANCO EN iOS
+      //       backgroundColor: "white",
+      //     },
+      //     default: {
+      //       // 🔥 APLICACIÓN DEL COLOR BLANCO EN Android/Web
+      //       backgroundColor: "#f5f5f5",
+      //     },
+      //   }),
+      // }}
+
       screenOptions={{
-        // Usamos el color definido para mantener la consistencia del tema, o el predeterminado
-        tabBarActiveTintColor: activeTintColor,
+        // ...
         headerShown: false,
+        tabBarActiveTintColor: activeTintColor,
         tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
+
+        // 🚨 NO usamos tabBarBackground, pero si lo tuvieras, asegúrate de que no tenga bordes.
+        // tabBarBackground: TabBarBackground,
+
         tabBarStyle: Platform.select({
           ios: {
             position: "absolute",
+            backgroundColor: "white",
+            // 🔥 SOLUCIÓN 1 (iOS): Eliminar el borde superior por defecto de la barra
+            borderTopWidth: 0,
+            // Puedes añadir una sombra personalizada si lo deseas, por ejemplo:
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 5,
           },
-          default: {},
+          default: {
+            backgroundColor: "white",
+            // 🔥 SOLUCIÓN 2 (Android/Web): Eliminar la elevación/sombra por defecto
+            elevation: 0,
+            borderTopWidth: 0,
+          },
         }),
       }}
     >
@@ -60,7 +98,7 @@ export default function TabLayout() {
 
       {/* 2. SCHEDULES (Horarios / Tareas) */}
       <Tabs.Screen
-        name="schedules" // Asegúrate de que este archivo exista en (tabs)/schedules.tsx
+        name="scheduleScreen" // Asegúrate de que este archivo exista en (tabs)/schedules.tsx
         options={{
           title: "Horarios",
           tabBarIcon: ({ color }) => (
@@ -71,7 +109,7 @@ export default function TabLayout() {
 
       {/* 3. PETS (Mascotas) */}
       <Tabs.Screen
-        name="pets" // Asegúrate de que este archivo exista en (tabs)/pets.tsx
+        name="petScreen" // Asegúrate de que este archivo exista en (tabs)/pets.tsx
         options={{
           title: "Mascotas",
           tabBarIcon: ({ color }) => <TabBarIcon name="dog" color={color} />,
@@ -80,7 +118,7 @@ export default function TabLayout() {
 
       {/* 4. DISPENSER (Dispensador) */}
       <Tabs.Screen
-        name="dispenser" // Asegúrate de que este archivo exista en (tabs)/dispenser.tsx
+        name="dispenserScreen" // Asegúrate de que este archivo exista en (tabs)/dispenser.tsx
         options={{
           title: "Dispensador",
           tabBarIcon: ({ color }) => <TabBarIcon name="bone" color={color} />,
@@ -89,12 +127,10 @@ export default function TabLayout() {
 
       {/* 5. CONFIG (Configuración) */}
       <Tabs.Screen
-        name="config" // Asegúrate de que este archivo exista en (tabs)/config.tsx
+        name="configScreen" // Asegúrate de que este archivo exista en (tabs)/config.tsx
         options={{
           title: "Configuración",
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="cog-outline" color={color} />
-          ),
+          tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
     </Tabs>

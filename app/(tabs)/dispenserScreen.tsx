@@ -68,11 +68,10 @@ const DISPENSERS_DATA: DispenserData[] = [
 ];
 
 export default function DispenserScreen() {
-  // El dispensador principal es ahora el que está en "top"
   const [dispensers, setDispensers] = React.useState(DISPENSERS_DATA);
   const mainDispenser = dispensers.find((d) => d.position === "top");
 
-  // Funciones de acción
+  // Funciones de acción (se mantienen sin cambios)
   const handleEdit = () =>
     console.log(`Editar Dispensador ${mainDispenser?.id}`);
   const handleDelete = () =>
@@ -81,104 +80,44 @@ export default function DispenserScreen() {
     console.log(`Ver detalles de Dispensador ${mainDispenser?.id}`);
   const handleSound = () =>
     console.log(`Activar sonido en Dispensador ${mainDispenser?.id}`);
-
-  // Acción de Añadir
   const handleAdd = () => {
     console.log(
       "Añadir nuevo dispensador (Activado desde la posición de Foco)"
     );
   };
 
-  // --- LÓGICA DE ROTACIÓN CONDICIONAL (4 POSICIONES PERIFÉRICAS) ---
+  // --- LÓGICA DE GIRO HORARIO SIMPLE ---
 
-  // Las 4 posiciones son periféricas entre sí, pero una de ellas ('top') es el foco visual
   type PositionKey = DispenserPosition;
 
-  // 🔥 Secuencia de Rotación Horaria (Clockwise)
-  // left -> top -> right -> bottom -> left
-  const CLOCKWISE_SEQUENCE: Record<PositionKey, PositionKey> = {
+  // 🔥 CICLO DE GIRO HORARIO (Clockwise): El que estaba en X se mueve a Y
+  // top -> right -> bottom -> left -> top
+  const CLOCKWISE_CYCLE: Record<PositionKey, PositionKey> = {
     top: "right",
     right: "bottom",
     bottom: "left",
     left: "top",
   };
 
-  // 🔥 Secuencia de Rotación Antihoraria (Counter-Clockwise)
-  // right -> top -> left -> bottom -> right
-  const COUNTER_CLOCKWISE_SEQUENCE: Record<PositionKey, PositionKey> = {
-    top: "left",
-    left: "bottom",
-    bottom: "right",
-    right: "top",
-  };
-
-  /**
-   * Determina la secuencia de rotación basándose en la posición del dispensador seleccionado.
-   * @param selectedPosition Posición del elemento clickeado.
-   * @returns La secuencia de rotación a aplicar.
-   */
-  const getRotationSequence = (selectedPosition: PositionKey) => {
-    // REGLA: DISP DERECHO HORARIO, DISP IZQ ANTIHORARIO
-    if (selectedPosition === "right" || selectedPosition === "bottom") {
-      // Clic en RIGHT o BOTTOM rota en sentido HORARIO (los ítems se mueven Clockwise)
-      return CLOCKWISE_SEQUENCE;
-    }
-
-    // Clic en LEFT rota en sentido ANTIHORARIO (los ítems se mueven Counter-Clockwise)
-    return COUNTER_CLOCKWISE_SEQUENCE;
-  };
-
-  // LÓGICA DE ROTACIÓN CIRCULAR (TODO GIRA)
+  // LÓGICA DE ROTACIÓN CONDICIONAL
   const handleSelectDispenser = (selectedId: number) => {
     setDispensers((prevDispensers) => {
-      // El foco es el que está en 'top'
-      const currentFocus = prevDispensers.find((d) => d.position === "top");
       const selectedDispenser = prevDispensers.find((d) => d.id === selectedId);
 
-      if (
-        !currentFocus ||
-        !selectedDispenser ||
-        selectedId === currentFocus.id // Si ya está en el foco, no hacer nada
-      ) {
-        return prevDispensers;
+      // 1. CONDICIÓN: SOLO GIRAR SI SE HACE CLICK EN EL DISPENSADOR DERECHO
+      if (!selectedDispenser || selectedDispenser.position !== "right") {
+        return prevDispensers; // No es el dispensador de la derecha, no hacemos nada
       }
 
-      // La posición del dispensador clicado (ej: "left", "right", "bottom")
-      const positionSelected = selectedDispenser.position as PositionKey;
+      // 2. APLICAR EL GIRO HORARIO A TODOS
+      const rotatedDispensers = prevDispensers.map((d) => {
+        const oldPosition = d.position as PositionKey;
+        const newPosition = CLOCKWISE_CYCLE[oldPosition]; // Avanza una posición
 
-      // 1. EL INTERCAMBIO
-      const updatedDispensers = prevDispensers.map((d) => {
-        if (d.id === selectedId) {
-          // El dispensador clicado se mueve al "top" (foco)
-          return { ...d, position: "top" as PositionKey };
-        } else if (d.id === currentFocus.id) {
-          // El antiguo dispensador del "top" se mueve al slot que dejó el seleccionado
-          return { ...d, position: positionSelected };
-        }
-        return d;
+        return { ...d, position: newPosition };
       });
 
-      // 2. LA ROTACIÓN DE LOS OTROS 2 PERIFÉRICOS
-      const nonRotatingPeripheralId = currentFocus.id; // El que acaba de salir del foco
-
-      // Obtenemos la secuencia de rotación
-      const sequence = getRotationSequence(positionSelected);
-
-      return updatedDispensers.map((d) => {
-        // Rotar solo si:
-        // a) Es un dispensador periférico (no está en "top")
-        // b) NO es el dispensador que acaba de moverse del foco a un slot periférico (currentFocus.id)
-        if (
-          d.position !== "top" &&
-          d.id !== selectedId &&
-          d.id !== nonRotatingPeripheralId
-        ) {
-          const oldPosition = d.position as PositionKey;
-          const newPosition = sequence[oldPosition]; // Avanza un paso
-          return { ...d, position: newPosition };
-        }
-        return d;
-      });
+      return rotatedDispensers;
     });
   };
 

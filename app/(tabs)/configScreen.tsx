@@ -51,14 +51,14 @@ export default function ConfigScreen() {
             title="Dispositivo y Conexión"
           />
           <ConfigRow
-            iconName="wifi" // 📶
+            iconName="wifi-outline" // 📶
             title="Conexión Wi-Fi"
             subtitle={wifiStatus}
             type="navigation"
             onPress={() => handlePress("wifiSettings")}
           />
           <ConfigRow
-            iconName="alert-sharp" // ✅
+            iconName="alert-circle-outline" // ✅
             title="Aviso de nivel"
             subtitle="Notificar cuando el nivel esté bajo"
             type="toggle"
@@ -75,7 +75,7 @@ export default function ConfigScreen() {
             title="Configuraciones de la App"
           />
           <ConfigRow
-            iconName="notifications" // 🔔
+            iconName="notifications-outline" // 🔔
             title="Notificaciones Push"
             subtitle="Recordatorios y alertas"
             type="toggle"
@@ -83,7 +83,7 @@ export default function ConfigScreen() {
             onToggle={(v) => handleToggle("notificaciones", v)}
           />
           <ConfigRow
-            iconName="sparkles" // 🔊
+            iconName="sparkles-outline" // 🔊
             title="Efectos de sonido"
             subtitle="Sonidos de la app."
             type="toggle"
@@ -91,7 +91,7 @@ export default function ConfigScreen() {
             onToggle={(v) => handleToggle("sonidos", v)}
           />
           <ConfigRow
-            iconName="moon" // 🌙
+            iconName="moon-outline" // 🌙
             title="Modo Oscuro"
             subtitle="Activa el modo oscuro."
             type="toggle"
@@ -108,11 +108,13 @@ export default function ConfigScreen() {
             title="Acceso Rápido"
           />
           <ConfigRow
+            iconName="settings-outline"
             title="Calibración del dispensador"
             type="navigation"
             onPress={() => handlePress("calibrationScreen")}
           />
           <ConfigRow
+            iconName="paw-outline"
             title="Perfil de mascotas & info. de salud"
             type="navigation"
             onPress={() => handlePress("petProfile")}
@@ -127,16 +129,19 @@ export default function ConfigScreen() {
             title="Soporte y Privacidad"
           />
           <ConfigRow
+            iconName="help-circle-outline"
             title="Ayuda y FAQ"
             type="navigation"
             onPress={() => handlePress("faq")}
           />
           <ConfigRow
+            iconName="document-text-outline"
             title="Política de Privacidad"
             type="navigation"
             onPress={() => handlePress("privacy")}
           />
           <ConfigRow
+            iconName="file-tray-full-outline"
             title="Términos de Servicio"
             type="navigation"
             onPress={() => handlePress("terms")}

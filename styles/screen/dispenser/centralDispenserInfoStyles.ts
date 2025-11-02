@@ -79,8 +79,8 @@ export const centralDispenserInfoStyles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         // Hacemos el círculo un poco más pequeño que el contenedor principal
-        width: 140, 
-        height: 140,
+        width: 180, 
+        height: 180,
         borderRadius: 999,
         backgroundColor: AppColors.light, // Fondo claro para el botón '+'
         borderWidth: 3,
