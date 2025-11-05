@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 import { welcomeStyles as styles } from "@/styles/welcomeScreenStyles";
-import { Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router"; // Importación de useRouter
 
 /**
  * Pantalla de Bienvenida (Onboarding) con el logo y opciones de inicio de sesión.
@@ -13,18 +13,20 @@ import { Stack } from "expo-router";
 const dogImage = require("@/assets/images/Dog1.png"); // Reemplaza con la ruta correcta de tu imagen
 
 export default function WelcomeScreen() {
-  // Función de ejemplo para la navegación
+  const router = useRouter(); // Inicialización del router
+
+  // Función de navegación a Login
   const handleLogin = () => {
-    // Aquí iría la navegación a la pantalla de Login
+    // Navegación real a la ruta de Login
+    router.push("/(auth)/loginScreen");
     console.log("Navegar a Iniciar Sesión");
-    // Ejemplo: router.push('/login');
   };
 
-  // Función de ejemplo para la navegación
+  // Función de navegación a Registro
   const handleRegister = () => {
-    // Aquí iría la navegación a la pantalla de Registro
+    // Navegación real a la ruta de Registro
+    router.push("/(auth)/registerScreen");
     console.log("Navegar a Registrarse");
-    // Ejemplo: router.push('/register');
   };
 
   return (

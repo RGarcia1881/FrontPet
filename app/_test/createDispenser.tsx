@@ -13,7 +13,7 @@ import { useRouter } from "expo-router";
 import { getUsers, User } from "@/api/users";
 import { getPets, Pet } from "@/api/pets";
 import { createDispenserStyles as styles } from "@/styles/_test/createDispenserStyles";
-import { handleSubmit } from "@/handlers/createDispenserHandlers";
+import { handleSubmit } from "@/handlers/_test/createDispenserHandlers";
 
 export default function CreateDispenser() {
   const router = useRouter();

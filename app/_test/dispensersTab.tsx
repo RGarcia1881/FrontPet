@@ -18,7 +18,7 @@ import { dispenserStyles as styles } from "@/styles/_test/dispenserStyles";
 import {
   handleDeleteDispenser,
   handleSaveEditDispenser,
-} from "@/handlers/dispensersHandlers";
+} from "@/handlers/_test/dispensersHandlers";
 
 export default function DispensersScreen() {
   const [dispensers, setDispensers] = useState<Dispenser[]>([]);

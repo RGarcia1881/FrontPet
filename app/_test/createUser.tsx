@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { createUserStyles as styles } from "@/styles/_test/createUsersStyles";
-import { handleSubmit } from "@/handlers/createUserHandlers";
+import { handleSubmit } from "@/handlers/_test/createUserHandlers";
 
 export default function CreateUser() {
   const router = useRouter();

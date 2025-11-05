@@ -15,4 +15,19 @@ const API = axios.create({
   },
 });
 
+/**
+ * Configura el token de acceso JWT en el encabezado de todas las solicitudes futuras
+ * enviadas por esta instancia de Axios.
+ * @param token El token de acceso (string) o null para hacer logout.
+ */
+export const setAuthToken = (token: string | null) => {
+  if (token) {
+    // Si hay un token, lo adjuntamos como "Bearer <token>"
+    API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    // Si se pasa null, eliminamos el encabezado (logout)
+    delete API.defaults.headers.common['Authorization'];
+  }
+};
+
 export default API;

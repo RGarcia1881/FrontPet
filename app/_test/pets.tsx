@@ -10,7 +10,10 @@ import {
 import { getPets } from "@/api/pets";
 import { Pet } from "@/types/pet";
 import { petsStyles as styles } from "@/styles/_test/petsStyles";
-import { handleDeletePet, handleSaveEditPet } from "@/handlers/petsHandlers";
+import {
+  handleDeletePet,
+  handleSaveEditPet,
+} from "@/handlers/_test/petsHandlers";
 
 export default function PetsScreen() {
   const [pets, setPets] = useState<Pet[]>([]);

@@ -10,7 +10,7 @@ import {
 import {
   handleCalibrateTare,
   handleCalibrateSetWeight,
-} from "@/handlers/esp32Handlers";
+} from "@/handlers/_test/esp32Handlers";
 import { calibrationStyles as styles } from "@/styles/_test/calibrationStyles";
 
 export default function CalibrationScreen() {

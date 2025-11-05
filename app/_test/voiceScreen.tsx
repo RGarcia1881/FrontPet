@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Audio } from "expo-av";
 import { voiceStyles as styles } from "@/styles/_test/voiceScreenStyles";
-import { handlePlayAudio } from "@/handlers/voiceScreenHandlers";
+import { handlePlayAudio } from "@/handlers/_test/voiceScreenHandlers";
 
 export default function VoiceScreen() {
   const [recording, setRecording] = useState<Audio.Recording | undefined>();

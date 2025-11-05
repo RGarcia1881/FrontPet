@@ -13,7 +13,7 @@ import { userScreenStyles as styles } from "@/styles/_test/userScreenStyles";
 import {
   handleDeleteUser,
   handleSaveEditUser,
-} from "@/handlers/userScreenHandlers";
+} from "@/handlers/_test/userScreenHandlers";
 
 export default function UserScreen() {
   const [users, setUsers] = useState<User[]>([]);
