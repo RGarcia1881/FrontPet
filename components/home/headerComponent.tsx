@@ -5,7 +5,8 @@ import {
   Image,
   SafeAreaView,
   TouchableOpacity,
-  StyleSheet, // Se añade StyleSheet para estilos del dropdown
+  StyleSheet,
+  // Se añade StyleSheet para estilos del dropdown
 } from "react-native";
 // MODIFICADO: Se añaden importaciones necesarias para la lógica
 import { Stack, useRouter } from "expo-router";
@@ -18,14 +19,25 @@ import { headerStyles as styles } from "@/styles/screen/home/GeneralUI/headerCom
  */
 export function HeaderComponent() {
   const router = useRouter();
-  // AÑADIDO: Hook para acceder a la función signOut
-  const { signOut } = useAuth();
+
+  // ⭐️ MODIFICACIÓN CLAVE: Usamos useAuth para obtener el usuario
+  const { signOut, user } = useAuth();
+
   // AÑADIDO: Estado para controlar la visibilidad del menú desplegable de opciones
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
 
-  // ⚠️ HARDCODED DATA
-  const userName = "Raul";
-  const profileImageUrl = require("@/assets/images/Profile.jpg"); // Placeholder de imagen
+  // ⭐️ DATOS DINÁMICOS DEL USUARIO
+  // Usamos el nombre y apellido del usuario, o un valor por defecto si no están cargados.
+  const displayUserName = user
+    ? `${user.first_name} ${user.last_name}`
+    : "Mascota Amiga";
+
+  // La URL de la imagen (debe ser accesible desde la web o un recurso local)
+  // Usamos una imagen local por defecto si la URL no está disponible o no se proporciona
+  const profileImageSource = user?.image
+    ? { uri: user.image } // Si la DB proporciona una URL, úsala
+    : require("@/assets/images/Profile.jpg"); // Placeholder local
+
   const logo = require("@/assets/images/LogoNegro.png"); // Placeholder de imagen
 
   // AÑADIDO: Función para alternar la visibilidad del menú
@@ -38,8 +50,6 @@ export function HeaderComponent() {
     setIsOptionsVisible(false); // Ocultar el menú inmediatamente
     try {
       await signOut();
-      // La redirección al Welcome/Auth screen (ruta '/') es manejada por el AuthContext en el root layout.
-      // Si la redirección automática falla, puedes forzarla:
       router.replace("/(auth)/welcomeScreen");
     } catch (e) {
       console.error("Error al cerrar sesión:", e);
@@ -68,8 +78,9 @@ export function HeaderComponent() {
           {/* Texto Bienvenida + Nombre */}
           <View style={styles.textWrapper}>
             <Text style={styles.welcomeText}>Bienvenido</Text>
+            {/* ⭐️ CAMPO DINÁMICO ⭐️ */}
             <Text style={styles.userName} numberOfLines={1}>
-              {userName}
+              {displayUserName}
             </Text>
           </View>
         </View>
@@ -77,7 +88,8 @@ export function HeaderComponent() {
         {/* 2. Imagen de Perfil del Usuario y Contenedor de Opciones */}
         <View style={internalStyles.profileContainer}>
           <TouchableOpacity onPress={handleProfilePress}>
-            <Image source={profileImageUrl} style={styles.profileImage} />
+            {/* ⭐️ CAMPO DINÁMICO ⭐️ */}
+            <Image source={profileImageSource} style={styles.profileImage} />
           </TouchableOpacity>
 
           {/* AÑADIDO: Menú Desplegable (Options Box) */}

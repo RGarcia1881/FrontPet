@@ -8,13 +8,15 @@ import React, {
   useCallback,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-// Importaciones de las funciones de API y Axios Helper
 import {
   login as apiLogin,
   register as apiRegister,
   LoginCredentials,
   RegisterData,
+  AuthResponse,
 } from "../api/auth";
+// ⭐️ IMPORTAMOS LA NUEVA FUNCIÓN y tipo de datos de perfil desde user.ts
+import { getUserById, UserProfileData } from "../api/users";
 import { setAuthToken } from "../api/api";
 
 // =========================================================================
@@ -24,13 +26,7 @@ import { setAuthToken } from "../api/api";
 /**
  * Define la estructura del usuario logueado.
  */
-export interface UserProfile {
-  id: number; // Su backend devuelve user_id como número
-  email: string;
-  username?: string;
-  first_name?: string;
-  last_name?: string;
-}
+export interface UserProfile extends UserProfileData {} // Usamos el tipo de user.ts
 
 /**
  * Define la forma de los valores y funciones disponibles en el contexto.
@@ -39,14 +35,15 @@ export interface IAuthContextValue {
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (credentials: LoginCredentials) => Promise<void>; // Ajustamos para usar LoginCredentials
+  signIn: (credentials: LoginCredentials) => Promise<void>;
   signOut: () => Promise<void>;
-  register: (data: RegisterData) => Promise<void>; // Ajustamos para usar RegisterData
+  register: (data: RegisterData) => Promise<void>;
 }
 
 // Claves para almacenar los tokens.
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
+const USER_ID_KEY = "userId"; // ⭐️ Clave para guardar el ID del usuario
 
 // Create the AuthContext
 export const AuthContext = createContext<IAuthContextValue | undefined>(
@@ -62,16 +59,14 @@ export const AuthContext = createContext<IAuthContextValue | undefined>(
  */
 const parseAuthError = (e: any): string => {
   try {
-    // Asumimos que los errores del backend vienen como JSON stringificado
+    // Si la respuesta es una instancia de Error pero contiene datos JSON
     const errorData = JSON.parse(e.message);
 
-    // Error de credenciales inválidas (login)
     if (errorData?.error) {
       return errorData.error;
     }
 
-    // Errores de validación de campos (register)
-    // Buscamos el primer error de cualquier campo conocido
+    // Busca errores a nivel de campo (ej: email: ["Este campo es requerido"])
     for (const key in errorData) {
       if (Array.isArray(errorData[key]) && errorData[key].length > 0) {
         return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${
@@ -82,6 +77,7 @@ const parseAuthError = (e: any): string => {
 
     return "Error desconocido al procesar la solicitud.";
   } catch {
+    // Si no se pudo parsear el JSON
     return "Error de conexión o formato de respuesta inesperado.";
   }
 };
@@ -92,111 +88,142 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Helper para guardar tokens en almacenamiento y en Axios
-  const saveAndSetTokens = async (
-    accessToken: string,
-    refreshToken: string,
-    userId: number,
-    email: string
-  ) => {
-    try {
-      await AsyncStorage.multiSet([
-        [ACCESS_TOKEN_KEY, accessToken],
-        [REFRESH_TOKEN_KEY, refreshToken],
-      ]);
-      // 🚨 IMPORTANTE: Establecer el token de acceso en Axios
-      setAuthToken(accessToken);
+  // --- Helpers ---
 
-      // Establecer el usuario logueado (solo con ID y email por ahora)
-      setUser({ id: userId, email: email });
-    } catch (error) {
-      console.error("Error al guardar tokens:", error);
-    }
-  };
-
-  // Carga la sesión al iniciar la aplicación (con useCallback para evitar re-render)
-  const loadSession = useCallback(async () => {
+  /**
+   * Helper para limpiar la sesión (tokens, ID y usuario)
+   */
+  const handleSignOut = useCallback(async () => {
     try {
-      const tokens = await AsyncStorage.multiGet([
+      await AsyncStorage.multiRemove([
         ACCESS_TOKEN_KEY,
         REFRESH_TOKEN_KEY,
+        USER_ID_KEY,
       ]);
-      const accessToken = tokens.find(([key]) => key === ACCESS_TOKEN_KEY)?.[1];
-
-      if (accessToken) {
-        // 🚨 IMPORTANTE: Establecer el token de acceso en Axios
-        setAuthToken(accessToken);
-        // NOTA: Como no podemos obtener el perfil completo, solo marcamos como logueado
-        setUser({ id: -1, email: "Sesión cargada" });
-      }
-    } catch (e) {
-      console.error("Error al cargar el token de autenticación:", e);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []); // Dependencia vacía para que se ejecute solo una vez
-
-  useEffect(() => {
-    loadSession();
-  }, [loadSession]);
-
-  // --- Lógica de Inicio de Sesión (Conectado a la API) ---
-  const signIn = async (credentials: LoginCredentials) => {
-    setIsLoading(true);
-    try {
-      // 1. Llamada REAL a su backend
-      const { access, refresh, user_id } = await apiLogin(credentials);
-
-      // 2. Guardar tokens y establecer el estado del usuario
-      await saveAndSetTokens(access, refresh, user_id, credentials.email);
-    } catch (error: any) {
-      // Manejo de errores de la API
-      await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]);
-      setAuthToken(null);
-      setUser(null);
-      // Lanzamos un error que el componente de Login pueda capturar
-      throw new Error(parseAuthError(error));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // --- Lógica de Registro (Conectado a la API) ---
-  const register = async (data: RegisterData) => {
-    setIsLoading(true);
-    try {
-      // 1. Llamada REAL a su backend
-      const { access, refresh, user_id } = await apiRegister(data);
-
-      // 2. Guardar tokens y establecer el estado del usuario con la info completa
-      await saveAndSetTokens(access, refresh, user_id, data.email);
-      setUser({
-        id: user_id,
-        email: data.email,
-        username: data.username,
-        first_name: data.first_name,
-        last_name: data.last_name,
-      });
-    } catch (error: any) {
-      await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]);
-      setAuthToken(null);
-      setUser(null);
-      throw new Error(parseAuthError(error));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // --- Lógica de Cierre de Sesión ---
-  const handleSignOut = async () => {
-    try {
-      // 1. Limpiar tokens y encabezado de Axios
-      await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]);
       setAuthToken(null);
       setUser(null);
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
       setUser(null);
+    }
+  }, []);
+
+  /**
+   * Helper para guardar tokens y el ID en almacenamiento y establecer el token en Axios.
+   */
+  const saveAndSetAuthData = async (
+    accessToken: string,
+    refreshToken: string,
+    userId: number
+  ) => {
+    try {
+      await AsyncStorage.multiSet([
+        [ACCESS_TOKEN_KEY, accessToken],
+        [REFRESH_TOKEN_KEY, refreshToken],
+        [USER_ID_KEY, String(userId)], // Guardamos el ID como string
+      ]);
+      setAuthToken(accessToken);
+    } catch (error) {
+      console.error("Error al guardar datos de autenticación:", error);
+      throw error;
+    }
+  };
+
+  /**
+   * Helper para obtener el perfil completo usando el ID del usuario.
+   * @param userId El ID del usuario a buscar.
+   */
+  const fetchAndSetUserProfile = async (userId: number) => {
+    try {
+      // ⭐️ Utilizamos la función getUsersById que usa la ruta /users/{id}/
+      const profile = await getUserById(userId);
+      setUser(profile);
+    } catch (error) {
+      console.error("Error al obtener el perfil:", error);
+      // Si falla el perfil, limpiamos la sesión
+      await handleSignOut();
+      // Lanzamos un error más específico
+      throw new Error(
+        "Credenciales correctas, pero error al cargar el perfil del usuario. Por favor, intente de nuevo."
+      );
+    }
+  };
+
+  // --- Carga de Sesión ---
+
+  // Carga la sesión al iniciar la aplicación
+  const loadSession = useCallback(async () => {
+    try {
+      const authData = await AsyncStorage.multiGet([
+        ACCESS_TOKEN_KEY,
+        REFRESH_TOKEN_KEY,
+        USER_ID_KEY, // Obtenemos el ID guardado
+      ]);
+
+      const accessToken = authData.find(
+        ([key]) => key === ACCESS_TOKEN_KEY
+      )?.[1];
+      const userIdString = authData.find(([key]) => key === USER_ID_KEY)?.[1];
+      const userId = userIdString ? parseInt(userIdString, 10) : null;
+
+      if (accessToken && userId) {
+        setAuthToken(accessToken);
+        // ⭐️ Usamos el ID guardado para cargar el perfil
+        await fetchAndSetUserProfile(userId);
+      } else {
+        await handleSignOut(); // Si falta algún dato, limpiamos
+      }
+    } catch (e) {
+      console.error("Error al cargar la sesión:", e);
+      await handleSignOut();
+    } finally {
+      setIsLoading(false);
+    }
+  }, [handleSignOut]);
+
+  useEffect(() => {
+    loadSession();
+  }, [loadSession]);
+
+  // --- Lógica de Autenticación (Login y Registro) ---
+
+  const processAuthResponse = async ({
+    access,
+    refresh,
+    user_id,
+  }: AuthResponse) => {
+    // 1. Guardar tokens y ID
+    await saveAndSetAuthData(access, refresh, user_id);
+
+    // 2. Obtener el perfil completo usando el ID
+    await fetchAndSetUserProfile(user_id);
+  };
+
+  // --- Inicio de Sesión ---
+  const signIn = async (credentials: LoginCredentials) => {
+    setIsLoading(true);
+    try {
+      const response = await apiLogin(credentials);
+      await processAuthResponse(response);
+    } catch (error: any) {
+      // No hacemos signOut aquí para que el error de login se propague correctamente
+      throw new Error(parseAuthError(error));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- Registro ---
+  const register = async (data: RegisterData) => {
+    setIsLoading(true);
+    try {
+      const response = await apiRegister(data);
+      await processAuthResponse(response);
+    } catch (error: any) {
+      // No hacemos signOut aquí para que el error de registro se propague correctamente
+      throw new Error(parseAuthError(error));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -204,13 +231,14 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
   const value = useMemo<IAuthContextValue>(
     () => ({
       user,
-      isAuthenticated: !!user,
+      // Consideramos autenticado si tenemos el objeto usuario y campos clave
+      isAuthenticated: !!user && !!user.first_name,
       isLoading,
       signIn,
       signOut: handleSignOut,
       register,
     }),
-    [user, isLoading]
+    [user, isLoading, handleSignOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
