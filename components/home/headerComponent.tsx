@@ -6,11 +6,9 @@ import {
   SafeAreaView,
   TouchableOpacity,
   StyleSheet,
-  // Se añade StyleSheet para estilos del dropdown
 } from "react-native";
-// MODIFICADO: Se añaden importaciones necesarias para la lógica
 import { Stack, useRouter } from "expo-router";
-import { useAuth } from "@/context/authContext"; // Asegúrate de que la ruta sea correcta
+import { useAuth } from "@/context/authContext";
 import { headerStyles as styles } from "@/styles/screen/home/GeneralUI/headerComponentStyles";
 
 /**
@@ -20,34 +18,33 @@ import { headerStyles as styles } from "@/styles/screen/home/GeneralUI/headerCom
 export function HeaderComponent() {
   const router = useRouter();
 
-  // ⭐️ MODIFICACIÓN CLAVE: Usamos useAuth para obtener el usuario
+  // ⭐️ OBTENEMOS EL USUARIO DEL CONTEXTO
   const { signOut, user } = useAuth();
 
-  // AÑADIDO: Estado para controlar la visibilidad del menú desplegable de opciones
+  // Estado para controlar la visibilidad del menú desplegable de opciones
   const [isOptionsVisible, setIsOptionsVisible] = useState(false);
 
-  // ⭐️ DATOS DINÁMICOS DEL USUARIO
-  // Usamos el nombre y apellido del usuario, o un valor por defecto si no están cargados.
+  // ⭐️ DATOS DINÁMICOS: Nombre
   const displayUserName = user
     ? `${user.first_name} ${user.last_name}`
     : "Mascota Amiga";
 
-  // La URL de la imagen (debe ser accesible desde la web o un recurso local)
-  // Usamos una imagen local por defecto si la URL no está disponible o no se proporciona
+  // ⭐️ DATOS DINÁMICOS: Imagen de Perfil
+  // Comprueba si el objeto de usuario tiene una propiedad 'image' con una URL válida.
   const profileImageSource = user?.image
-    ? { uri: user.image } // Si la DB proporciona una URL, úsala
-    : require("@/assets/images/Profile.jpg"); // Placeholder local
+    ? { uri: user.image } // Usa la URL de la imagen proporcionada por la API
+    : require("@/assets/images/Profile.jpg"); // Usa la imagen placeholder local si no hay URL
 
-  const logo = require("@/assets/images/LogoNegro.png"); // Placeholder de imagen
+  const logo = require("@/assets/images/LogoNegro.png"); // Placeholder de imagen del logo
 
-  // AÑADIDO: Función para alternar la visibilidad del menú
+  // Función para alternar la visibilidad del menú
   const handleProfilePress = () => {
     setIsOptionsVisible(!isOptionsVisible);
   };
 
-  // AÑADIDO: Función para cerrar sesión
+  // Función para cerrar sesión
   const handleLogout = async () => {
-    setIsOptionsVisible(false); // Ocultar el menú inmediatamente
+    setIsOptionsVisible(false); // Ocultar el menú
     try {
       await signOut();
       router.replace("/(auth)/welcomeScreen");
@@ -78,7 +75,7 @@ export function HeaderComponent() {
           {/* Texto Bienvenida + Nombre */}
           <View style={styles.textWrapper}>
             <Text style={styles.welcomeText}>Bienvenido</Text>
-            {/* ⭐️ CAMPO DINÁMICO ⭐️ */}
+            {/* ⭐️ Nombre Dinámico ⭐️ */}
             <Text style={styles.userName} numberOfLines={1}>
               {displayUserName}
             </Text>
@@ -88,11 +85,11 @@ export function HeaderComponent() {
         {/* 2. Imagen de Perfil del Usuario y Contenedor de Opciones */}
         <View style={internalStyles.profileContainer}>
           <TouchableOpacity onPress={handleProfilePress}>
-            {/* ⭐️ CAMPO DINÁMICO ⭐️ */}
+            {/* ⭐️ Imagen de Perfil Dinámica ⭐️ */}
             <Image source={profileImageSource} style={styles.profileImage} />
           </TouchableOpacity>
 
-          {/* AÑADIDO: Menú Desplegable (Options Box) */}
+          {/* Menú Desplegable (Options Box) */}
           {isOptionsVisible && (
             <View style={internalStyles.optionsBox}>
               <TouchableOpacity
