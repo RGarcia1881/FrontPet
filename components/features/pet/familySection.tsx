@@ -1,36 +1,17 @@
-import React, { useRef } from "react";
-import { View, Text, ScrollView, Animated } from "react-native";
+import React, { useRef, useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Animated,
+  ActivityIndicator,
+} from "react-native";
 import { styles } from "@/styles/screen/pets/familySectionStyles";
-// 🔥 Eliminamos importaciones de 'react-native-reanimated'
-// import { SharedValue } from "react-native-reanimated";
-// import Animated, { useAnimatedScrollHandler, useSharedValue } from "react-native-reanimated";
-
-// Importamos el componente animado (ahora usa Animated.Value)
 import { AnimatedPetCard } from "./animatedPetCard";
-
-const PET_DATA = [
-  {
-    id: 1,
-    name: "Snoopy",
-    breed: "Golden Retriever",
-    image: require("@/assets/images/Perrin.jpg"),
-  },
-  {
-    id: 2,
-    name: "Droopy",
-    breed: "Doberman",
-    image: require("@/assets/images/Perrin.jpg"),
-  },
-  {
-    id: 3,
-    name: "Max",
-    breed: "Poodle",
-    image: require("@/assets/images/Perrin.jpg"),
-  },
-];
+import { getPets, Pet as PetType } from "@/api/pets";
+import { useAuth } from "@/context/authContext";
 
 interface FamilySectionProps {
-  // Ahora es Animated.Value, no SharedValue
   scrollY: Animated.Value;
 }
 
@@ -38,51 +19,141 @@ interface FamilySectionProps {
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export function FamilySection({ scrollY }: FamilySectionProps) {
-  const handleCardPress = (petName: string) => {
-    console.log(`Ver detalles de la mascota: ${petName}`);
+  const [pets, setPets] = useState<PetType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
+
+  // 🔥 FUNCIÓN PARA CARGAR MASCOTAS
+  const loadPets = async () => {
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const userPets = await getPets();
+      setPets(userPets);
+    } catch (err: any) {
+      console.error("Error cargando mascotas:", err);
+      setError("Error al cargar las mascotas");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // 🔥 NUEVO: Inicialización de la posición de scroll horizontal con useRef
+  // 🔥 EFECTO PARA CARGAR MASCOTAS AL MONTAR EL COMPONENTE
+  useEffect(() => {
+    loadPets();
+  }, [isAuthenticated]);
+
+  const handleCardPress = (pet: PetType) => {
+    console.log(`Ver detalles de la mascota: ${pet.name}`, pet);
+    // Aquí puedes navegar a la pantalla de detalles de la mascota
+  };
+
+  // 🔥 Inicialización de la posición de scroll horizontal con useRef
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  // 🔥 NUEVO: Handler para el scroll horizontal usando Animated.event()
+  // 🔥 Handler para el scroll horizontal usando Animated.event()
   const scrollXHandler = Animated.event(
     [
       {
         nativeEvent: {
           contentOffset: {
-            x: scrollX, // Mapea contentOffset.x al valor de scrollX
+            x: scrollX,
           },
         },
       },
     ],
     {
-      useNativeDriver: true, // Esto es seguro para el mapeo de scroll
+      useNativeDriver: true,
     }
   );
+
+  // 🔥 ESTADOS DE CARGA Y ERROR
+  if (loading) {
+    return (
+      <View style={styles.sectionContainer}>
+        <Text style={styles.title}>Esta es tu familia</Text>
+        <View
+          style={[
+            styles.carousel,
+            { justifyContent: "center", alignItems: "center", height: 120 },
+          ]}
+        >
+          <ActivityIndicator size="small" color="#0000ff" />
+          <Text style={{ marginTop: 10, fontSize: 12 }}>
+            Cargando mascotas...
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.sectionContainer}>
+        <Text style={styles.title}>Esta es tu familia</Text>
+        <View
+          style={[
+            styles.carousel,
+            { justifyContent: "center", alignItems: "center", height: 120 },
+          ]}
+        >
+          <Text style={{ color: "red", fontSize: 12, marginBottom: 10 }}>
+            {error}
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.sectionContainer}>
       <Text style={styles.title}>Esta es tu familia</Text>
 
-      {/* 🔥 Usamos AnimatedScrollView */}
+      {/* 🔥 SCROLLVIEW CON MASCOTAS REALES DE LA BD */}
       <AnimatedScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.carousel}
-        onScroll={scrollXHandler} // Conectamos el handler del scrollX
-        scrollEventThrottle={16} // Importante para suavidad
+        onScroll={scrollXHandler}
+        scrollEventThrottle={16}
       >
-        {PET_DATA.map((pet, index) => (
+        {pets.map((pet, index) => (
           <AnimatedPetCard
             key={pet.id}
-            scrollY={scrollY} // Se sigue pasando el scroll vertical
-            scrollX={scrollX} // Pasamos el Animated.Value horizontal
+            scrollY={scrollY}
+            scrollX={scrollX}
             index={index}
-            petData={pet}
-            onPress={() => handleCardPress(pet.name)}
+            petData={{
+              id: pet.id, // 🔥 Incluir el ID real
+              name: pet.name,
+              breed: pet.race, // Usar 'race' de la BD
+              image: pet.image, // 🔥 IMAGEN REAL DE LA BD
+              weight: pet.weight, // 🔥 Incluir peso si quieres mostrarlo
+              age: pet.age, // 🔥 Incluir edad si quieres mostrarlo
+            }}
+            onPress={() => handleCardPress(pet)}
           />
         ))}
+
+        {/* Mensaje si no hay mascotas */}
+        {pets.length === 0 && (
+          <View
+            style={[
+              styles.carousel,
+              { justifyContent: "center", alignItems: "center", width: 300 },
+            ]}
+          >
+            <Text style={{ textAlign: "center", color: "#666" }}>
+              No tienes mascotas registradas aún
+            </Text>
+          </View>
+        )}
       </AnimatedScrollView>
     </View>
   );

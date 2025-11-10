@@ -15,6 +15,7 @@ export const getPets = async () => {
   return res.data;
 };
 
+
 export const getPetById = async (id: number) => {
   const res = await API.get(`/pets/${id}/`);
   return res.data;
