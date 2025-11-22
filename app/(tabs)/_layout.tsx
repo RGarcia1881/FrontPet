@@ -35,28 +35,6 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      // screenOptions={{
-      //   // Usamos el color definido para mantener la consistencia del tema, o el predeterminado
-      //   tabBarActiveTintColor: activeTintColor,
-      //   headerShown: false,
-      //   tabBarButton: HapticTab,
-
-      //   // 🚨 Comentamos esto por si interfiere con el color blanco
-      //   // tabBarBackground: TabBarBackground,
-
-      //   tabBarStyle: Platform.select({
-      //     ios: {
-      //       position: "absolute",
-      //       // 🔥 APLICACIÓN DEL COLOR BLANCO EN iOS
-      //       backgroundColor: "white",
-      //     },
-      //     default: {
-      //       // 🔥 APLICACIÓN DEL COLOR BLANCO EN Android/Web
-      //       backgroundColor: "#f5f5f5",
-      //     },
-      //   }),
-      // }}
-
       screenOptions={{
         // ...
         headerShown: false,
