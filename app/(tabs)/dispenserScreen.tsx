@@ -163,7 +163,7 @@ export default function DispenserScreen() {
         </View>
 
         {/* 3. Contenedor Circular Principal (Elementos Fijos) */}
-        <View style={styles.circularContainer}>
+        <View style={styles.circularContainer} pointerEvents="box-none">
           {/* CÍRCULO DE INFORMACIÓN CENTRAL */}
           {/* Muestra la información del dispensador que está en el slot 'top' */}
           {centralInfoProps && <CentralDispenserInfo {...centralInfoProps} />}

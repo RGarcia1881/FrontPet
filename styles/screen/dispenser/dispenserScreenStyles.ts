@@ -45,7 +45,7 @@ export const dispenserScreenStyles = StyleSheet.create({
         width: CIRCULAR_CONTAINER_SIZE,
         height: CIRCULAR_CONTAINER_SIZE,
         marginBottom: -(CIRCULAR_CONTAINER_SIZE / 3), 
-        zIndex: 2,
+        zIndex: -1,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: -70,
@@ -110,6 +110,8 @@ export const dispenserScreenStyles = StyleSheet.create({
         alignItems: 'center',
         padding: 20,
         position: 'relative', 
+        alignSelf: 'center',
+        aspectRatio: 1,
     },
     
     infoText: {
