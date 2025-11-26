@@ -58,6 +58,14 @@ export const centralDispenserInfoStyles = StyleSheet.create({
     width: "50%",
   },
 
+  // ✅ AJUSTADO: Más separación entre íconos
+  actionIconsContainerWide: {
+    position: "absolute",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "70%", // Más ancho para mayor separación
+  },
+
   // Estilo individual para el ícono de acción
   actionIcon: {
     width: ICON_SIZE,
@@ -69,9 +77,14 @@ export const centralDispenserInfoStyles = StyleSheet.create({
     top: 25,
   },
 
-  // Posición para los íconos inferiores (View/Sound)
+  // ✅ AJUSTADO: Subir los íconos inferiores
   bottomIcons: {
-    bottom: 35,
+    bottom: 45, // Subido de 35 a 45
+  },
+
+  // ✅ NUEVO: Posición para la segunda fila de botones
+  secondRowIcons: {
+    bottom: 15, // Posicionada más arriba que la primera fila
   },
 
   // --- NUEVOS ESTILOS PARA EL BOTÓN GRANDE DE AÑADIR (id: 99) ---

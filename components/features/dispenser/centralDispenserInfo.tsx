@@ -13,7 +13,11 @@ import { Audio } from "expo-av";
 import { centralDispenserInfoStyles as styles } from "@/styles/screen/dispenser/centralDispenserInfoStyles";
 import { AppColors } from "@/styles/global/theme";
 import { VIDEO_STREAM_URL } from "@/api/raspi";
-import { handlePlayAudio } from "@/handlers/raspi/voiceHandlers";
+import { handlePlayAudio } from "@/handlers/_test/voiceScreenHandlers";
+import {
+  handleFoodRoutine,
+  handleWaterRoutine,
+} from "@/handlers/esp32/esp32Handlers";
 
 interface CentralDispenserInfoProps {
   name: string;
@@ -24,6 +28,8 @@ interface CentralDispenserInfoProps {
   onView?: () => void;
   onSound?: () => void;
   onAddClick?: () => void;
+  onFood?: () => void;
+  onWater?: () => void;
 }
 
 export function CentralDispenserInfo({
@@ -35,19 +41,23 @@ export function CentralDispenserInfo({
   onView,
   onSound,
   onAddClick,
+  onFood,
+  onWater,
 }: CentralDispenserInfoProps) {
   const [isCameraMode, setIsCameraMode] = useState(false);
   const [isCameraVisible, setIsCameraVisible] = useState(true);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isLoadingVoice, setIsLoadingVoice] = useState(false);
+  const [isLoadingFood, setIsLoadingFood] = useState(false);
+  const [isLoadingWater, setIsLoadingWater] = useState(false);
   const [recording, setRecording] = useState<Audio.Recording | undefined>();
   const [audioUri, setAudioUri] = useState<string | undefined>();
   const [recordingTime, setRecordingTime] = useState(0);
 
   const iconColor = AppColors.light;
   const iconSize = 24;
-  const timerRef = useRef<number | null>(null); // ✅ Corregido: number | null en lugar de NodeJS.Timeout
+  const timerRef = useRef<number | null>(null);
   const animationRefs = useRef<Animated.Value[]>(
     Array(5)
       .fill(null)
@@ -58,7 +68,6 @@ export function CentralDispenserInfo({
   useEffect(() => {
     if (isRecording) {
       timerRef.current = window.setInterval(() => {
-        // ✅ Corregido: window.setInterval
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } else {
@@ -103,11 +112,119 @@ export function CentralDispenserInfo({
         animations.forEach((anim) => anim.stop());
       };
     } else {
-      // Resetear animaciones cuando no se está grabando
       animationRefs.current.forEach((anim) => anim.setValue(10));
     }
   }, [isRecording]);
 
+  // ===== FUNCIONALIDAD DE DISPENSACIÓN =====
+
+  const handleFoodDispense = async () => {
+    setIsLoadingFood(true);
+    try {
+      // ✅ CORREGIDO: Setters con tipos correctos
+      const dummySetMessage: React.Dispatch<React.SetStateAction<string>> = (
+        msg
+      ) => {
+        if (typeof msg === "function") {
+          const result = msg("");
+          console.log(`🍽️ [COMIDA]: ${result}`);
+        } else {
+          console.log(`🍽️ [COMIDA]: ${msg}`);
+        }
+      };
+
+      const dummySetMessageType: React.Dispatch<
+        React.SetStateAction<"success" | "error">
+      > = (type) => {
+        if (typeof type === "function") {
+          const result = type("success");
+          console.log(`📊 [COMIDA] Tipo: ${result}`);
+        } else {
+          console.log(`📊 [COMIDA] Tipo: ${type}`);
+        }
+      };
+
+      const dummySetLoading: React.Dispatch<React.SetStateAction<boolean>> = (
+        loading
+      ) => {
+        if (typeof loading === "function") {
+          const result = loading(false);
+          console.log(`🔄 [COMIDA] Loading: ${result}`);
+        } else {
+          console.log(`🔄 [COMIDA] Loading: ${loading}`);
+        }
+      };
+
+      await handleFoodRoutine(
+        dummySetMessage,
+        dummySetMessageType,
+        dummySetLoading
+      );
+
+      if (onFood) {
+        onFood();
+      }
+    } catch (error) {
+      console.error("Error en rutina de comida:", error);
+      Alert.alert("Error", "No se pudo activar la rutina de comida");
+    } finally {
+      setIsLoadingFood(false);
+    }
+  };
+
+  const handleWaterDispense = async () => {
+    setIsLoadingWater(true);
+    try {
+      // ✅ CORREGIDO: Setters con tipos correctos
+      const dummySetMessage: React.Dispatch<React.SetStateAction<string>> = (
+        msg
+      ) => {
+        if (typeof msg === "function") {
+          const result = msg("");
+          console.log(`💧 [AGUA]: ${result}`);
+        } else {
+          console.log(`💧 [AGUA]: ${msg}`);
+        }
+      };
+
+      const dummySetMessageType: React.Dispatch<
+        React.SetStateAction<"success" | "error">
+      > = (type) => {
+        if (typeof type === "function") {
+          const result = type("success");
+          console.log(`📊 [AGUA] Tipo: ${result}`);
+        } else {
+          console.log(`📊 [AGUA] Tipo: ${type}`);
+        }
+      };
+
+      const dummySetLoading: React.Dispatch<React.SetStateAction<boolean>> = (
+        loading
+      ) => {
+        if (typeof loading === "function") {
+          const result = loading(false);
+          console.log(`🔄 [AGUA] Loading: ${result}`);
+        } else {
+          console.log(`🔄 [AGUA] Loading: ${loading}`);
+        }
+      };
+
+      await handleWaterRoutine(
+        dummySetMessage,
+        dummySetMessageType,
+        dummySetLoading
+      );
+
+      if (onWater) {
+        onWater();
+      }
+    } catch (error) {
+      console.error("Error en rutina de agua:", error);
+      Alert.alert("Error", "No se pudo activar la rutina de agua");
+    } finally {
+      setIsLoadingWater(false);
+    }
+  };
   // ===== FUNCIONALIDAD DE VOZ =====
 
   const startVoiceRecording = async () => {
@@ -145,7 +262,6 @@ export function CentralDispenserInfo({
     try {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
-      // ✅ Corregido: Manejo seguro del URI que puede ser null
       if (uri) {
         setAudioUri(uri);
       } else {
@@ -154,6 +270,8 @@ export function CentralDispenserInfo({
     } catch (error) {
       console.error("Error al detener grabación:", error);
       Alert.alert("Error", "No se pudo detener la grabación.");
+    } finally {
+      setRecording(undefined);
     }
   };
 
@@ -179,31 +297,12 @@ export function CentralDispenserInfo({
     }
   };
 
-  const exitVoiceMode = async () => {
+  const exitVoiceMode = () => {
     setIsVoiceMode(false);
     setIsRecording(false);
     setAudioUri(undefined);
     setRecordingTime(0);
-
-    // ✅ Versión más segura con manejo de errores
-    if (recording) {
-      try {
-        // Verificar el estado de la grabación antes de intentar detenerla
-        const status = await recording.getStatusAsync();
-        if (status.isRecording) {
-          await recording.stopAndUnloadAsync();
-        }
-      } catch (error) {
-        // Ignorar errores de "ya detenida"
-        console.log(
-          "Error al detener grabación (probablemente ya estaba detenida):",
-          error
-        );
-      } finally {
-        // Siempre limpiar la referencia
-        setRecording(undefined);
-      }
-    }
+    setRecording(undefined);
   };
 
   const handleVoiceButtonPress = () => {
@@ -252,7 +351,6 @@ export function CentralDispenserInfo({
   if (isVoiceMode) {
     return (
       <View style={styles.infoCircle}>
-        {/* Header - Botón de cerrar/volver */}
         <View style={[styles.actionIconsContainer, styles.topIcons]}>
           <Pressable onPress={exitVoiceMode}>
             <Ionicons
@@ -264,7 +362,6 @@ export function CentralDispenserInfo({
           </Pressable>
         </View>
 
-        {/* Espectro de audio animado */}
         <View style={styles.audioSpectrum}>
           {animationRefs.current.map((anim, index) => (
             <Animated.View
@@ -280,13 +377,11 @@ export function CentralDispenserInfo({
           ))}
         </View>
 
-        {/* Timer de grabación */}
         <Text style={styles.timerText}>
           {Math.floor(recordingTime / 60)}:
           {(recordingTime % 60).toString().padStart(2, "0")}
         </Text>
 
-        {/* Estado de grabación */}
         <Text style={styles.voiceStatusText}>
           {isRecording
             ? "Grabando..."
@@ -295,9 +390,7 @@ export function CentralDispenserInfo({
             : "Listo para grabar"}
         </Text>
 
-        {/* Botones de control de voz */}
         <View style={[styles.actionIconsContainer, styles.bottomIcons]}>
-          {/* Botón Stop/Record (en lugar del ojo) */}
           <Pressable
             onPress={isRecording ? stopVoiceRecording : startVoiceRecording}
             disabled={isLoadingVoice}
@@ -310,7 +403,6 @@ export function CentralDispenserInfo({
             />
           </Pressable>
 
-          {/* Botón Enviar (en lugar del micrófono) */}
           <Pressable
             onPress={sendAudioToDispenser}
             disabled={!audioUri || isLoadingVoice}
@@ -326,7 +418,6 @@ export function CentralDispenserInfo({
           </Pressable>
         </View>
 
-        {/* Loading indicator */}
         {isLoadingVoice && (
           <View style={styles.voiceLoadingOverlay}>
             <ActivityIndicator size="small" color={AppColors.light} />
@@ -384,6 +475,15 @@ export function CentralDispenserInfo({
   // MODO INFORMACIÓN NORMAL
   return (
     <View style={styles.infoCircle}>
+      {(isLoadingFood || isLoadingWater) && (
+        <View style={styles.voiceLoadingOverlay}>
+          <ActivityIndicator size="large" color={AppColors.light} />
+          <Text style={styles.voiceLoadingText}>
+            {isLoadingFood ? "Dispensando comida..." : "Dispensando agua..."}
+          </Text>
+        </View>
+      )}
+
       <View style={[styles.actionIconsContainer, styles.topIcons]}>
         {onEdit && (
           <Pressable onPress={onEdit}>
@@ -414,7 +514,39 @@ export function CentralDispenserInfo({
         Estatus: {status}
       </Text>
 
+      {/* PRIMERA FILA: Comida y Agua */}
       <View style={[styles.actionIconsContainer, styles.bottomIcons]}>
+        <Pressable
+          onPress={handleFoodDispense}
+          disabled={isLoadingFood || isLoadingWater}
+        >
+          <Ionicons
+            name="fast-food"
+            size={iconSize}
+            color={
+              isLoadingFood || isLoadingWater ? AppColors.subtext : iconColor
+            }
+            style={styles.actionIcon}
+          />
+        </Pressable>
+
+        <Pressable
+          onPress={handleWaterDispense}
+          disabled={isLoadingFood || isLoadingWater}
+        >
+          <Ionicons
+            name="water"
+            size={iconSize}
+            color={
+              isLoadingFood || isLoadingWater ? AppColors.subtext : iconColor
+            }
+            style={styles.actionIcon}
+          />
+        </Pressable>
+      </View>
+
+      {/* SEGUNDA FILA: Cámara y Micrófono */}
+      <View style={[styles.actionIconsContainer, { bottom: 10 }]}>
         {onView && (
           <Pressable onPress={toggleCameraMode}>
             <Ionicons

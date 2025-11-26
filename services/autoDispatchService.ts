@@ -1,51 +1,48 @@
 // services/autoDispatchService.ts
 
 import { handleFoodRoutine } from '@/handlers/esp32/esp32Handlers';
-import { Dispatch, SetStateAction } from 'react';
 
-// Wrapper que usa tu handleFoodRoutine existente con setters dummy CORREGIDOS
 export const executeAutomaticFoodRoutine = async (): Promise<boolean> => {
   try {
-    console.log('🤖 Iniciando rutina automática de comida...');
+    console.log('🤖 [AUTO-DISPATCH] Iniciando rutina automática de comida...');
     
-    // Creamos setters dummy CORREGIDOS que manejan SetStateAction
-    const dummySetMessage: Dispatch<SetStateAction<string>> = (msg) => {
-      if (typeof msg === 'function') {
-        // Si es una función, la ejecutamos (aunque en automático no debería pasar)
-        const result = msg(''); // Pasamos un estado vacío como base
-        console.log(`📢 [AUTO]: ${result}`);
+    // Setters compatibles con React.Dispatch<SetStateAction<T>>
+    const dummySetMessage: React.Dispatch<React.SetStateAction<string>> = (value) => {
+      if (typeof value === 'function') {
+        // Si es una función (como en setState(prev => prev + 'x'))
+        const result = value(''); // Ejecutar la función con un estado inicial vacío
+        console.log(`📢 [AUTO-DISPATCH] Función devuelve: ${result}`);
       } else {
-        // Si es un string directo
-        console.log(`📢 [AUTO]: ${msg}`);
+        // Si es un valor directo
+        console.log(`📢 [AUTO-DISPATCH]: ${value}`);
       }
     };
     
-    const dummySetMessageType: Dispatch<SetStateAction<'success' | 'error'>> = (type) => {
-      if (typeof type === 'function') {
-        const result = type('success'); // Estado base 'success'
-        console.log(`📊 [AUTO] Tipo mensaje: ${result}`);
+    const dummySetMessageType: React.Dispatch<React.SetStateAction<'success' | 'error'>> = (value) => {
+      if (typeof value === 'function') {
+        const result = value('success'); // Ejecutar la función con un estado inicial 'success'
+        console.log(`📊 [AUTO-DISPATCH] Tipo función devuelve: ${result}`);
       } else {
-        console.log(`📊 [AUTO] Tipo mensaje: ${type}`);
+        console.log(`📊 [AUTO-DISPATCH] Tipo: ${value}`);
       }
     };
     
-    const dummySetLoading: Dispatch<SetStateAction<boolean>> = (loading) => {
-      if (typeof loading === 'function') {
-        const result = loading(false); // Estado base false
-        console.log(`🔄 [AUTO] Loading: ${result}`);
+    const dummySetLoading: React.Dispatch<React.SetStateAction<boolean>> = (value) => {
+      if (typeof value === 'function') {
+        const result = value(false); // Ejecutar la función con un estado inicial false
+        console.log(`🔄 [AUTO-DISPATCH] Loading función devuelve: ${result}`);
       } else {
-        console.log(`🔄 [AUTO] Loading: ${loading}`);
+        console.log(`🔄 [AUTO-DISPATCH] Loading: ${value}`);
       }
     };
-    
-    // Ejecutar tu función existente con los setters corregidos
+
     await handleFoodRoutine(dummySetMessage, dummySetMessageType, dummySetLoading);
     
-    console.log('✅ Rutina automática de comida completada');
+    console.log('✅ [AUTO-DISPATCH] Rutina automática de comida completada');
     return true;
     
   } catch (error) {
-    console.error('❌ Error en rutina automática de comida:', error);
+    console.error('❌ [AUTO-DISPATCH] Error en rutina automática de comida:', error);
     return false;
   }
 };

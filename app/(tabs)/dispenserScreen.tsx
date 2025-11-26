@@ -3,6 +3,12 @@ import { View, Text, ScrollView, SafeAreaView, Pressable } from "react-native";
 import { dispenserScreenStyles as styles } from "@/styles/screen/dispenser/dispenserScreenStyles";
 import { CentralDispenserInfo } from "@/components/features/dispenser/centralDispenserInfo";
 import { AnimatedDispenser } from "@/components/features/dispenser/animatedDispenser";
+import {
+  checkPendingSchedules,
+  clearExecutedSchedules,
+} from "@/services/scheduleService";
+import { executeAutomaticFoodRoutine } from "@/services/autoDispatchService";
+import { useAuth } from "@/context/authContext";
 
 // --- TIPOS CORREGIDOS (Solo 4 posiciones) ---
 type DispenserPosition = "top" | "right" | "bottom" | "left";
@@ -68,10 +74,11 @@ const DISPENSERS_DATA: DispenserData[] = [
 ];
 
 export default function DispenserScreen() {
+  const { user } = useAuth();
   const [dispensers, setDispensers] = React.useState(DISPENSERS_DATA);
   const mainDispenser = dispensers.find((d) => d.position === "top");
 
-  // Funciones de acción (se mantienen sin cambios)
+  // Funciones de acción existentes
   const handleEdit = () =>
     console.log(`Editar Dispensador ${mainDispenser?.id}`);
   const handleDelete = () =>
@@ -84,6 +91,15 @@ export default function DispenserScreen() {
     console.log(
       "Añadir nuevo dispensador (Activado desde la posición de Foco)"
     );
+  };
+
+  // ✅ NUEVAS FUNCIONES PARA COMIDA Y AGUA
+  const handleFood = () => {
+    console.log(`Activar comida en dispensador ${mainDispenser?.id}`);
+  };
+
+  const handleWater = () => {
+    console.log(`Activar agua en dispensador ${mainDispenser?.id}`);
   };
 
   // --- LÓGICA DE GIRO HORARIO SIMPLE ---
@@ -132,6 +148,9 @@ export default function DispenserScreen() {
         onDelete: mainDispenser.id !== 99 ? handleDelete : undefined,
         onView: mainDispenser.id !== 99 ? handleView : undefined,
         onSound: mainDispenser.id !== 99 ? handleSound : undefined,
+        // ✅ NUEVAS ACCIONES PARA COMIDA Y AGUA
+        onFood: mainDispenser.id !== 99 ? handleFood : undefined,
+        onWater: mainDispenser.id !== 99 ? handleWater : undefined,
         // La acción de Añadir se pasa solo si ES el botón '+'
         onAddClick: mainDispenser.id === 99 ? handleAdd : undefined,
       }
@@ -139,6 +158,8 @@ export default function DispenserScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Botones de prueba para horarios automáticos */}
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
