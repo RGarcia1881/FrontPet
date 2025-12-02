@@ -10,55 +10,110 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { AuthProvider, useAuth } from "@/context/authContext";
 import { useEffect } from "react";
 import { checkPendingSchedules } from "@/services/scheduleService";
-import { executeAutomaticFoodRoutine } from "@/services/autoDispatchService"; // ✅ Importación correcta
+import { executeAutomaticFoodRoutine } from "@/services/autoDispatchService";
+import {
+  startWaterMonitor,
+  stopWaterMonitor,
+  checkAndDispenseWaterIfNeeded,
+} from "@/services/waterMonitorService";
 
-// Componente para verificar horarios automáticamente
-function ScheduleChecker() {
+// Componente para verificar horarios y monitorear agua automáticamente
+function ScheduleAndWaterChecker() {
   const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (!isAuthenticated || !user?.id) {
-      console.log("🚫 [SCHEDULE] Usuario no autenticado o sin ID");
+      console.log("🚫 [AUTO-SYSTEM] Usuario no autenticado o sin ID");
+      stopWaterMonitor(); // Detener monitor de agua si no hay usuario
       return;
     }
 
-    console.log("👤 [SCHEDULE] Usuario autenticado:", user.id);
+    console.log("👤 [AUTO-SYSTEM] Usuario autenticado:", user.id);
 
-    const checkAndDispatch = async () => {
+    const performChecks = async () => {
       try {
-        console.log("⏰ [SCHEDULE] Ejecutando verificación programada...");
-        const shouldDispatch = await checkPendingSchedules(user.id);
+        console.log(
+          "⏰ [AUTO-SYSTEM] Ejecutando verificaciones automáticas..."
+        );
 
-        if (shouldDispatch) {
+        // 1. Verificar horarios de comida
+        const shouldDispatchFood = await checkPendingSchedules(user.id);
+
+        if (shouldDispatchFood) {
           console.log(
-            "🚀 [SCHEDULE] Ejecutando dispensación automática de comida"
+            "🍗 [AUTO-SYSTEM] Ejecutando dispensación automática de comida"
           );
           await executeAutomaticFoodRoutine();
         } else {
-          console.log(
-            "💤 [SCHEDULE] No hay horarios pendientes en este momento"
-          );
+          console.log("💤 [AUTO-SYSTEM] No hay horarios de comida pendientes");
+        }
+
+        // 2. Verificar nivel de agua (esto también se ejecuta automáticamente cada minuto)
+        console.log("💧 [AUTO-SYSTEM] Verificando nivel de agua...");
+        const waterDispensed = await checkAndDispenseWaterIfNeeded();
+
+        if (waterDispensed) {
+          console.log("✅ [AUTO-SYSTEM] Agua dispensada automáticamente");
         }
       } catch (error) {
-        console.error("❌ [SCHEDULE] Error en verificación automática:", error);
+        console.error(
+          "❌ [AUTO-SYSTEM] Error en verificaciones automáticas:",
+          error
+        );
       }
     };
 
-    // Verificar inmediatamente al cargar
-    console.log("🔍 [SCHEDULE] Verificación inicial al cargar app");
-    checkAndDispatch();
+    // Verificar inmediatamente al cargar la app
+    console.log("🔍 [AUTO-SYSTEM] Verificación inicial al cargar app");
+    performChecks();
 
-    // Configurar intervalo para verificar cada minuto
-    const interval = setInterval(checkAndDispatch, 60000); // 1 minuto
-    console.log("🔄 [SCHEDULE] Intervalo configurado: 60 segundos");
+    // Iniciar monitor de agua (se ejecuta en su propio intervalo)
+    console.log("🚀 [AUTO-SYSTEM] Iniciando monitor de agua...");
+    startWaterMonitor();
+
+    // Configurar intervalo general para verificaciones (cada minuto)
+    const checkInterval = setInterval(performChecks, 60000); // 1 minuto
+    console.log("🔄 [AUTO-SYSTEM] Intervalo general configurado: 60 segundos");
 
     return () => {
-      console.log("🧹 [SCHEDULE] Limpiando intervalo");
-      clearInterval(interval);
+      console.log("🧹 [AUTO-SYSTEM] Limpiando recursos...");
+      clearInterval(checkInterval);
+      stopWaterMonitor();
     };
   }, [isAuthenticated, user?.id]);
 
-  return null; // Este componente no renderiza nada visual
+  return null;
+}
+
+// Componente para cargar el estado inicial del monitor de agua
+function WaterMonitorInitializer() {
+  const { user, isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) {
+      return;
+    }
+
+    // Cargar configuración inicial del monitor de agua
+    const initializeWaterMonitor = async () => {
+      try {
+        // Aquí podrías cargar configuraciones personalizadas del usuario
+        console.log("💧 [WATER-MONITOR] Inicializando configuración...");
+
+        // Opcional: Cargar umbral personalizado desde AsyncStorage
+        // const customThreshold = await AsyncStorage.getItem('user_water_threshold');
+        // if (customThreshold) {
+        //   console.log(`💧 [WATER-MONITOR] Umbral personalizado: ${customThreshold}g`);
+        // }
+      } catch (error) {
+        console.error("❌ [WATER-MONITOR] Error inicializando:", error);
+      }
+    };
+
+    initializeWaterMonitor();
+  }, [isAuthenticated, user?.id]);
+
+  return null;
 }
 
 function RootLayoutContent() {
@@ -75,8 +130,11 @@ function RootLayoutContent() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      {/* Renderizamos el ScheduleChecker aquí */}
-      <ScheduleChecker />
+      {/* Componente principal que maneja todas las automatizaciones */}
+      <ScheduleAndWaterChecker />
+
+      {/* Inicializador para configuraciones adicionales */}
+      <WaterMonitorInitializer />
 
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
