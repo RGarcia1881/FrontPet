@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Image, Text, Pressable, ActivityIndicator } from "react-native";
+import {
+  View,
+  Image,
+  Text,
+  Pressable,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
 import { petsScreenStyles as styles } from "@/styles/screen/pets/petScreenStyles";
-import { getPets, Pet as PetType } from "@/api/pets";
+import { getPets, Pet as PetType, deletePet } from "@/api/pets";
 import { useAuth } from "@/context/authContext";
+import { PetFormModal } from "./petFormModal";
+import { PetDetailModal } from "./petDetailModal";
 
 // 🔥 IMÁGENES LOCALES PREDEFINIDAS
 const PET_IMAGES = [
@@ -12,18 +21,17 @@ const PET_IMAGES = [
   require("@/assets/images/P4.png"),
 ];
 
-// 🔥 INTERFAZ ACTUALIZADA: Ahora recibe el objeto mascota completo + índice para la imagen
+// 🔥 INTERFAZ ACTUALIZADA
 interface PetProps {
   pet: PetType;
   style: any;
   onView: (pet: PetType) => void;
-  imageIndex: number; // Índice para seleccionar la imagen local
+  imageIndex: number;
 }
 
-// 🔥 COMPONENTE Pet ACTUALIZADO - usa imagen local según índice
+// 🔥 COMPONENTE Pet ACTUALIZADO
 const Pet = ({ pet, style, onView, imageIndex }: PetProps) => (
   <View style={[styles.petContainer, style]}>
-    {/* 🔥 IMAGEN LOCAL según el índice */}
     <Image
       source={PET_IMAGES[imageIndex]}
       style={styles.petImage}
@@ -45,6 +53,9 @@ export function PetScene({ onAddMember }: PetSceneProps) {
   const [pets, setPets] = useState<PetType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedPet, setSelectedPet] = useState<PetType | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
   const { isAuthenticated } = useAuth();
 
   // 🔥 FUNCIÓN PARA CARGAR MASCOTAS
@@ -73,8 +84,62 @@ export function PetScene({ onAddMember }: PetSceneProps) {
   }, [isAuthenticated]);
 
   const handleViewPet = (pet: PetType) => {
-    console.log(`Ver detalles de: ${pet.name}`, pet);
-    // Aquí puedes navegar a la pantalla de detalles de la mascota
+    setSelectedPet(pet);
+    setShowDetailModal(true);
+  };
+
+  const handleAddPet = () => {
+    setSelectedPet(null); // Asegurar que no hay mascota seleccionada
+    setShowFormModal(true);
+  };
+
+  const handleEditPet = (pet: PetType) => {
+    setSelectedPet(pet);
+    setShowFormModal(true);
+  };
+
+  const handleDeletePet = async (petId: number) => {
+    Alert.alert(
+      "Eliminar Mascota",
+      `¿Estás seguro de que quieres eliminar a ${
+        pets.find((p) => p.id === petId)?.name
+      }? Esta acción no se puede deshacer.`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePet(petId);
+              Alert.alert("Éxito", "Mascota eliminada correctamente");
+              // Actualizar lista local sin recargar todo
+              setPets((prev) => prev.filter((pet) => pet.id !== petId));
+              // Cerrar modales si están abiertos
+              setShowDetailModal(false);
+              setSelectedPet(null);
+            } catch (error) {
+              Alert.alert("Error", "No se pudo eliminar la mascota");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleFormSuccess = (updatedPet: PetType) => {
+    if (selectedPet) {
+      // Si estamos editando, actualizar la mascota en la lista
+      setPets((prev) =>
+        prev.map((pet) => (pet.id === updatedPet.id ? updatedPet : pet))
+      );
+    } else {
+      // Si estamos creando, agregar la nueva mascota a la lista
+      setPets((prev) => [...prev, updatedPet]);
+    }
+    // Cerrar el modal
+    setShowFormModal(false);
+    setSelectedPet(null);
   };
 
   const handleRetry = () => {
@@ -99,7 +164,9 @@ export function PetScene({ onAddMember }: PetSceneProps) {
         ]}
       >
         <ActivityIndicator size="large" color="#0000ff" />
-        <Text style={{ marginTop: 10 }}>Cargando mascotas...</Text>
+        <Text style={{ marginTop: 10, color: "#666" }}>
+          Cargando mascotas...
+        </Text>
       </View>
     );
   }
@@ -134,9 +201,9 @@ export function PetScene({ onAddMember }: PetSceneProps) {
         <Pet
           key={pet.id}
           pet={pet}
-          style={petPositions[index % petPositions.length]} // Ciclo de posiciones
+          style={petPositions[index % petPositions.length]}
           onView={handleViewPet}
-          imageIndex={index % PET_IMAGES.length} // 🔥 Índice cíclico para imágenes
+          imageIndex={index % PET_IMAGES.length}
         />
       ))}
 
@@ -145,19 +212,67 @@ export function PetScene({ onAddMember }: PetSceneProps) {
         <View
           style={[
             styles.sceneContainer,
-            { justifyContent: "center", alignItems: "center" },
+            {
+              justifyContent: "center",
+              alignItems: "center",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(255, 255, 255, 0.8)",
+            },
           ]}
         >
-          <Text style={{ textAlign: "center", marginBottom: 20 }}>
+          <Text
+            style={{
+              textAlign: "center",
+              marginBottom: 20,
+              color: "#666",
+              fontSize: 16,
+            }}
+          >
             No tienes mascotas registradas aún
           </Text>
+          <Pressable onPress={handleAddPet} style={styles.addMemberButton}>
+            <Text style={styles.addMemberButtonText}>
+              Agregar mi primera mascota
+            </Text>
+          </Pressable>
         </View>
       )}
 
-      {/* Botón 'Agregar miembro' */}
-      <Pressable onPress={onAddMember} style={styles.addMemberButton}>
-        <Text style={styles.addMemberButtonText}>Agregar miembro</Text>
-      </Pressable>
+      {/* Botón 'Agregar miembro' - Solo mostrar si hay mascotas */}
+      {pets.length > 0 && (
+        <Pressable onPress={handleAddPet} style={styles.addMemberButton}>
+          <Text style={styles.addMemberButtonText}>Agregar miembro</Text>
+        </Pressable>
+      )}
+
+      {/* 🔥 MODAL DE DETALLE */}
+      {selectedPet && (
+        <PetDetailModal
+          visible={showDetailModal}
+          pet={selectedPet}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedPet(null);
+          }}
+          onEdit={handleEditPet}
+          onDelete={() => handleDeletePet(selectedPet.id)}
+        />
+      )}
+
+      {/* 🔥 MODAL DE FORMULARIO (CREAR/EDITAR) */}
+      <PetFormModal
+        visible={showFormModal}
+        pet={selectedPet}
+        onClose={() => {
+          setShowFormModal(false);
+          setSelectedPet(null);
+        }}
+        onSuccess={handleFormSuccess}
+      />
     </View>
   );
 }

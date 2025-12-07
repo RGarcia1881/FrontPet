@@ -16,7 +16,7 @@ import {
   AuthResponse,
 } from "../api/auth";
 // ⭐️ IMPORTAMOS LA NUEVA FUNCIÓN y tipo de datos de perfil desde user.ts
-import { getUserById, UserProfileData } from "../api/users";
+import { getUserById, UserProfileData, getCurrentUser } from "../api/users";
 import { setAuthToken } from "../api/api";
 
 // =========================================================================
@@ -57,29 +57,100 @@ export const AuthContext = createContext<IAuthContextValue | undefined>(
 /**
  * Función auxiliar para parsear y dar formato a los mensajes de error del backend.
  */
-const parseAuthError = (e: any): string => {
-  try {
-    // Si la respuesta es una instancia de Error pero contiene datos JSON
-    const errorData = JSON.parse(e.message);
+// Reemplaza completamente la función parseAuthError:
+const parseAuthError = (error: any): string => {
+  console.log("Raw error in parseAuthError:", error);
 
-    if (errorData?.error) {
-      return errorData.error;
+  // Si ya es un string, devuélvelo
+  if (typeof error === "string") {
+    return error;
+  }
+
+  // Si es un objeto Error con message
+  if (error instanceof Error) {
+    // Intenta parsear el mensaje como JSON
+    try {
+      const errorData = JSON.parse(error.message);
+
+      // Caso 1: El backend devolvió un objeto con campo 'error'
+      if (errorData?.error) {
+        return errorData.error;
+      }
+
+      // Caso 2: El backend devolvió errores de validación por campo
+      // Ej: {"email": ["Este campo es requerido"]}
+      for (const key in errorData) {
+        if (Array.isArray(errorData[key]) && errorData[key].length > 0) {
+          return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${
+            errorData[key][0]
+          }`;
+        }
+      }
+
+      // Caso 3: El backend devolvió un mensaje en campo 'message'
+      if (errorData?.message) {
+        return errorData.message;
+      }
+
+      // Si no se pudo extraer un mensaje claro, devolver el stringify
+      return JSON.stringify(errorData);
+    } catch {
+      // Si no es JSON, devolver el mensaje del error
+      return error.message || "Error desconocido";
+    }
+  }
+
+  // Si error.response existe (axios error)
+  if (error.response) {
+    const { data, status } = error.response;
+    console.log("Axios error response:", { data, status });
+
+    if (status === 401) {
+      return "Credenciales inválidas. Verifica tu email y contraseña.";
     }
 
-    // Busca errores a nivel de campo (ej: email: ["Este campo es requerido"])
-    for (const key in errorData) {
-      if (Array.isArray(errorData[key]) && errorData[key].length > 0) {
-        return `${key.charAt(0).toUpperCase() + key.slice(1)}: ${
-          errorData[key][0]
-        }`;
+    if (status === 400) {
+      // Intenta extraer mensajes de error del backend
+      if (data?.error) return data.error;
+      if (data?.message) return data.message;
+
+      // Para errores de validación de Django/DRF
+      if (typeof data === "object") {
+        const messages: string[] = [];
+
+        for (const key in data) {
+          if (Array.isArray(data[key])) {
+            messages.push(`${key}: ${data[key][0]}`);
+          } else if (typeof data[key] === "string") {
+            messages.push(data[key]);
+          }
+        }
+
+        if (messages.length > 0) {
+          return messages.join(", ");
+        }
       }
     }
 
-    return "Error desconocido al procesar la solicitud.";
-  } catch {
-    // Si no se pudo parsear el JSON
-    return "Error de conexión o formato de respuesta inesperado.";
+    if (status === 500) {
+      return "Error interno del servidor. Intenta más tarde.";
+    }
+
+    if (status === 0 || !status) {
+      return "No se pudo conectar con el servidor. Verifica tu conexión.";
+    }
+
+    return `Error ${status}: ${JSON.stringify(data)}`;
   }
+
+  // Si error.request existe pero no hay response (problema de red)
+  if (error.request) {
+    console.log("Network error:", error.message);
+    return "Error de conexión. Verifica tu red e intenta de nuevo.";
+  }
+
+  // Error genérico
+  return "Error desconocido al procesar la solicitud.";
 };
 
 export const AuthProvider: FC<{ children: React.ReactNode }> = ({
@@ -87,6 +158,16 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const refreshUser = async () => {
+    try {
+      const userData = await getCurrentUser();
+      setUser(userData);
+      await AsyncStorage.setItem("user", JSON.stringify(userData));
+    } catch (error) {
+      console.error("Error actualizando datos del usuario:", error);
+    }
+  };
 
   // --- Helpers ---
 
@@ -237,6 +318,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({
       signIn,
       signOut: handleSignOut,
       register,
+      refreshUser,
     }),
     [user, isLoading, handleSignOut]
   );
