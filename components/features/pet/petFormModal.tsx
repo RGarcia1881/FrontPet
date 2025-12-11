@@ -134,6 +134,7 @@ export const PetFormModal: React.FC<PetFormModalProps> = ({
       setImageLoading(false);
     }
   };
+
   // 🔥 FUNCIÓN PARA TOMAR FOTO CON LA CÁMARA
   const takePhoto = async () => {
     try {

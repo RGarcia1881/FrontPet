@@ -69,7 +69,7 @@ const DISPENSERS_DATA: DispenserData[] = [
     foodLevel: 0,
     isConnected: true,
     hasPower: true,
-    position: "left", // Botón Añadir en la última posición periférica disponible
+    position: "left",
   },
 ];
 
@@ -88,9 +88,7 @@ export default function DispenserScreen() {
   const handleSound = () =>
     console.log(`Activar sonido en Dispensador ${mainDispenser?.id}`);
   const handleAdd = () => {
-    console.log(
-      "Añadir nuevo dispensador (Activado desde la posición de Foco)"
-    );
+    console.log("Añadir nuevo dispensador");
   };
 
   // ✅ NUEVAS FUNCIONES PARA COMIDA Y AGUA
@@ -120,15 +118,13 @@ export default function DispenserScreen() {
     setDispensers((prevDispensers) => {
       const selectedDispenser = prevDispensers.find((d) => d.id === selectedId);
 
-      // 1. CONDICIÓN: SOLO GIRAR SI SE HACE CLICK EN EL DISPENSADOR DERECHO
       if (!selectedDispenser || selectedDispenser.position !== "right") {
-        return prevDispensers; // No es el dispensador de la derecha, no hacemos nada
+        return prevDispensers;
       }
 
-      // 2. APLICAR EL GIRO HORARIO A TODOS
       const rotatedDispensers = prevDispensers.map((d) => {
         const oldPosition = d.position as PositionKey;
-        const newPosition = CLOCKWISE_CYCLE[oldPosition]; // Avanza una posición
+        const newPosition = CLOCKWISE_CYCLE[oldPosition];
 
         return { ...d, position: newPosition };
       });
@@ -137,34 +133,42 @@ export default function DispenserScreen() {
     });
   };
 
-  // Props del círculo central (fijo en la pantalla)
+  // Props del círculo central
   const centralInfoProps = mainDispenser
     ? {
         name: mainDispenser.name,
         location: mainDispenser.location,
         status: mainDispenser.status,
-        // Las acciones se pasan si NO es el botón Añadir
+        waterLevel: mainDispenser.waterLevel,
+        foodLevel: mainDispenser.foodLevel,
+        onUpdateWaterLevel: (level: number) => {
+          console.log(`💧 Actualizando waterLevel a: ${level}%`);
+          setDispensers((prev) =>
+            prev.map((d) => (d.id === 1 ? { ...d, waterLevel: level } : d))
+          );
+        },
+        onUpdateFoodLevel: (level: number) => {
+          console.log(`🍽️ Actualizando foodLevel a: ${level}%`);
+          setDispensers((prev) =>
+            prev.map((d) => (d.id === 1 ? { ...d, foodLevel: level } : d))
+          );
+        },
         onEdit: mainDispenser.id !== 99 ? handleEdit : undefined,
         onDelete: mainDispenser.id !== 99 ? handleDelete : undefined,
         onView: mainDispenser.id !== 99 ? handleView : undefined,
         onSound: mainDispenser.id !== 99 ? handleSound : undefined,
-        // ✅ NUEVAS ACCIONES PARA COMIDA Y AGUA
         onFood: mainDispenser.id !== 99 ? handleFood : undefined,
         onWater: mainDispenser.id !== 99 ? handleWater : undefined,
-        // La acción de Añadir se pasa solo si ES el botón '+'
         onAddClick: mainDispenser.id === 99 ? handleAdd : undefined,
       }
     : null;
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Botones de prueba para horarios automáticos */}
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* 1. Título y Subtítulo */}
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Mis ayudantes</Text>
           <Text style={styles.subtitle}>
@@ -172,7 +176,6 @@ export default function DispenserScreen() {
           </Text>
         </View>
 
-        {/* 2. CONTENEDOR DE LA ANIMACIÓN (Rotación) */}
         <View style={styles.dispenserAnimationContainer}>
           {dispensers.map((disp) => (
             <AnimatedDispenser
@@ -183,10 +186,7 @@ export default function DispenserScreen() {
           ))}
         </View>
 
-        {/* 3. Contenedor Circular Principal (Elementos Fijos) */}
         <View style={styles.circularContainer} pointerEvents="box-none">
-          {/* CÍRCULO DE INFORMACIÓN CENTRAL */}
-          {/* Muestra la información del dispensador que está en el slot 'top' */}
           {centralInfoProps && <CentralDispenserInfo {...centralInfoProps} />}
         </View>
       </ScrollView>

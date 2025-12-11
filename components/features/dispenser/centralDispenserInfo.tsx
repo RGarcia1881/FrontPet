@@ -14,6 +14,7 @@ import { centralDispenserInfoStyles as styles } from "@/styles/screen/dispenser/
 import { AppColors } from "@/styles/global/theme";
 import { VIDEO_STREAM_URL } from "@/api/raspi";
 import { handlePlayAudio } from "@/handlers/_test/voiceScreenHandlers";
+import { distanceToPercentage } from "@/utils/distanceCalculator";
 import {
   handleFoodRoutine,
   handleWaterRoutine,
@@ -23,6 +24,10 @@ interface CentralDispenserInfoProps {
   name: string;
   location: string;
   status: string;
+  waterLevel?: number;
+  foodLevel?: number;
+  onUpdateWaterLevel?: (level: number) => void;
+  onUpdateFoodLevel?: (level: number) => void;
   onEdit?: () => void;
   onDelete?: () => void;
   onView?: () => void;
@@ -36,6 +41,10 @@ export function CentralDispenserInfo({
   name,
   location,
   status,
+  waterLevel = 0,
+  foodLevel = 0,
+  onUpdateWaterLevel,
+  onUpdateFoodLevel,
   onEdit,
   onDelete,
   onView,
@@ -121,7 +130,6 @@ export function CentralDispenserInfo({
   const handleFoodDispense = async () => {
     setIsLoadingFood(true);
     try {
-      // ✅ CORREGIDO: Setters con tipos correctos
       const dummySetMessage: React.Dispatch<React.SetStateAction<string>> = (
         msg
       ) => {
@@ -155,11 +163,17 @@ export function CentralDispenserInfo({
         }
       };
 
-      await handleFoodRoutine(
+      const distancia = await handleFoodRoutine(
         dummySetMessage,
         dummySetMessageType,
         dummySetLoading
       );
+
+      if (distancia !== null && onUpdateFoodLevel) {
+        const porcentaje = distanceToPercentage(distancia);
+        console.log(`📊 [COMIDA] ${distancia}cm → ${porcentaje}%`);
+        onUpdateFoodLevel(porcentaje);
+      }
 
       if (onFood) {
         onFood();
@@ -175,7 +189,6 @@ export function CentralDispenserInfo({
   const handleWaterDispense = async () => {
     setIsLoadingWater(true);
     try {
-      // ✅ CORREGIDO: Setters con tipos correctos
       const dummySetMessage: React.Dispatch<React.SetStateAction<string>> = (
         msg
       ) => {
@@ -209,11 +222,17 @@ export function CentralDispenserInfo({
         }
       };
 
-      await handleWaterRoutine(
+      const distancia = await handleWaterRoutine(
         dummySetMessage,
         dummySetMessageType,
         dummySetLoading
       );
+
+      if (distancia !== null && onUpdateWaterLevel) {
+        const porcentaje = distanceToPercentage(distancia);
+        console.log(`📊 [AGUA] ${distancia}cm → ${porcentaje}%`);
+        onUpdateWaterLevel(porcentaje);
+      }
 
       if (onWater) {
         onWater();
@@ -225,6 +244,7 @@ export function CentralDispenserInfo({
       setIsLoadingWater(false);
     }
   };
+
   // ===== FUNCIONALIDAD DE VOZ =====
 
   const startVoiceRecording = async () => {

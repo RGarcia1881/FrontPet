@@ -131,10 +131,10 @@ function RootLayoutContent() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       {/* Componente principal que maneja todas las automatizaciones */}
-      <ScheduleAndWaterChecker />
+      {/* <ScheduleAndWaterChecker /> */}
 
       {/* Inicializador para configuraciones adicionales */}
-      <WaterMonitorInitializer />
+      {/* <WaterMonitorInitializer /> */}
 
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />

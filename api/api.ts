@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios from "axios";
 
 // Reemplaza con la IP o dominio de tu backend Django
-const BASE_URL = 'http://localhost:8000/api/v1/';
+const BASE_URL = "http://192.168.0.231:8000/api/v1/";
 
 //Lab http://192.168.0.231:8000/api/v1/
 //LabVLAD http://10.177.120.206:8000/api/v1/
@@ -11,7 +11,7 @@ const API = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -23,10 +23,10 @@ const API = axios.create({
 export const setAuthToken = (token: string | null) => {
   if (token) {
     // Si hay un token, lo adjuntamos como "Bearer <token>"
-    API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    API.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
     // Si se pasa null, eliminamos el encabezado (logout)
-    delete API.defaults.headers.common['Authorization'];
+    delete API.defaults.headers.common["Authorization"];
   }
 };
 
