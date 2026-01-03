@@ -1,6 +1,7 @@
 // scheduleSection.tsx
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
@@ -33,6 +34,7 @@ interface ScheduleItem {
  * y la tabla de próximos horarios de alimentación.
  */
 export function ScheduleSection() {
+  const router = useRouter();
   const { user } = useAuth();
   const [horarios, setHorarios] = useState<Horario[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,9 +91,7 @@ export function ScheduleSection() {
   const tableData = getTableData();
 
   const handleViewSchedules = () => {
-    console.log("Navegar a la pantalla de horarios completos");
-    // Aquí puedes agregar la navegación a la pantalla completa de horarios
-    // navigation.navigate('Schedule');
+    router.push("/(tabs)/scheduleScreen");
   };
 
   // Si está cargando, mostrar un indicador

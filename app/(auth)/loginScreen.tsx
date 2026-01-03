@@ -119,14 +119,6 @@ export default function LoginScreen() {
         editable={!isButtonDisabled} // Deshabilitar mientras carga
       />
 
-      {/* Enlace de Olvidé Contraseña */}
-      <TouchableOpacity
-        onPress={handleForgotPassword}
-        disabled={isButtonDisabled}
-      >
-        <Text style={styles.forgotPasswordText}>¿Olvidó su contraseña?</Text>
-      </TouchableOpacity>
-
       {/* Botón de Iniciar Sesión */}
       <TouchableOpacity
         // Añadido estilo de opacidad para el estado deshabilitado

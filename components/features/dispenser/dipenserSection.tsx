@@ -4,6 +4,7 @@ import { Ionicons, FontAwesome } from "@expo/vector-icons";
 // Asegúrate de que este archivo exista y contenga los estilos correctos
 import { styles } from "@/styles/screen/dispenser/dispenserSectionStyles";
 import { AppColors } from "@/styles/global/theme";
+import { useRouter } from "expo-router";
 
 // Importamos el componente de animación (ya migrado a Animated)
 import { AnimatedLevel } from "@/components/features/dispenser/animatedLevel";
@@ -27,6 +28,7 @@ export function DispenserSection({ scrollY }: DispenserSectionProps) {
     waterLevel: 70,
     foodLevel: 20,
   };
+  const router = useRouter();
 
   // 🔥 LÓGICA DE ACTIVACIÓN POR SCROLL (Hilo JS)
   const dispenserRef = useRef<View>(null); // Referencia normal para medir
@@ -80,7 +82,11 @@ export function DispenserSection({ scrollY }: DispenserSectionProps) {
     /* ... */
   };
   const handleViewDetails = () => {
-    /* ... */
+    router.push("/(tabs)/dispenserScreen");
+  };
+
+  const handleViewDispensers = () => {
+    router.push("/(tabs)/dispenserScreen");
   };
 
   return (
@@ -89,7 +95,12 @@ export function DispenserSection({ scrollY }: DispenserSectionProps) {
       {/* 1. Header (Mis dispensadores. | Ver dispensadores) */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerText}>Mis dispensadores.</Text>
-        <TouchableOpacity style={styles.viewButton} activeOpacity={0.8}>
+
+        <TouchableOpacity
+          style={styles.viewButton}
+          activeOpacity={0.8}
+          onPress={handleViewDispensers}
+        >
           <Text style={styles.viewButtonText}>Ver dispensadores</Text>
         </TouchableOpacity>
       </View>

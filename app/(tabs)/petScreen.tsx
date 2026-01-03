@@ -19,7 +19,7 @@ export default function PetsScreen() {
         {/* Título de la pantalla */}
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Mi familia</Text>
-          <Text style={styles.subtitle}>Toda tu tripulacion esta aquí.</Text>
+          <Text style={styles.subtitle}>Toda tu tripulación esta aquí.</Text>
         </View>
 
         {/* La escena interactiva de las mascotas */}

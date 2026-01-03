@@ -25,11 +25,14 @@ export default function ConfigScreen() {
   const [loading, setLoading] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  const wifiStatus = "Home_WiFI_1";
+  const wifiStatus = "Semillero Invst";
 
   const handlePress = (route: string) => {
     console.log(`Navegar a: ${route}`);
     // Aquí puedes agregar la lógica de navegación según sea necesario
+  };
+  const handleTermPress = (route: string) => {
+    router.push(`/(legal)/Terms`);
   };
 
   const handleToggle = (setting: string, value: boolean) => {
@@ -125,14 +128,6 @@ export default function ConfigScreen() {
             type="navigation"
             onPress={() => handlePress("wifiSettings")}
           />
-          <ConfigRow
-            iconName="alert-circle-outline"
-            title="Aviso de nivel"
-            subtitle="Notificar cuando el nivel esté bajo"
-            type="toggle"
-            initialValue={true}
-            onToggle={(v) => handleToggle("nivelBajo", v)}
-          />
         </View>
 
         {/* --- SECCIÓN 3: CONFIGURACIONES DE LA APP --- */}
@@ -149,22 +144,6 @@ export default function ConfigScreen() {
             initialValue={true}
             onToggle={(v) => handleToggle("notificaciones", v)}
           />
-          <ConfigRow
-            iconName="sparkles-outline"
-            title="Efectos de sonido"
-            subtitle="Sonidos de la app."
-            type="toggle"
-            initialValue={false}
-            onToggle={(v) => handleToggle("sonidos", v)}
-          />
-          <ConfigRow
-            iconName="moon-outline"
-            title="Modo Oscuro"
-            subtitle="Activa el modo oscuro."
-            type="toggle"
-            initialValue={false}
-            onToggle={(v) => handleToggle("modoOscuro", v)}
-          />
         </View>
 
         {/* --- SECCIÓN 4: ACCESO RÁPIDO --- */}
@@ -178,12 +157,6 @@ export default function ConfigScreen() {
             title="Calibración del dispensador"
             type="navigation"
             onPress={handleCalibrationPress}
-          />
-          <ConfigRow
-            iconName="paw-outline"
-            title="Perfil de mascotas & info. de salud"
-            type="navigation"
-            onPress={() => handlePress("petProfile")}
           />
         </View>
 
@@ -200,16 +173,10 @@ export default function ConfigScreen() {
             onPress={() => handlePress("faq")}
           />
           <ConfigRow
-            iconName="document-text-outline"
-            title="Política de Privacidad"
-            type="navigation"
-            onPress={() => handlePress("privacy")}
-          />
-          <ConfigRow
             iconName="file-tray-full-outline"
             title="Términos de Servicio"
             type="navigation"
-            onPress={() => handlePress("terms")}
+            onPress={() => handleTermPress("terms")}
           />
         </View>
       </ScrollView>

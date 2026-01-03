@@ -10,6 +10,7 @@ import { styles } from "@/styles/screen/pets/familySectionStyles";
 import { AnimatedPetCard } from "./animatedPetCard";
 import { getPets, Pet as PetType } from "@/api/pets";
 import { useAuth } from "@/context/authContext";
+import { useRouter } from "expo-router";
 
 interface FamilySectionProps {
   scrollY: Animated.Value;
@@ -19,6 +20,7 @@ interface FamilySectionProps {
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export function FamilySection({ scrollY }: FamilySectionProps) {
+  const router = useRouter();
   const [pets, setPets] = useState<PetType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,7 @@ export function FamilySection({ scrollY }: FamilySectionProps) {
   }, [isAuthenticated]);
 
   const handleCardPress = (pet: PetType) => {
-    console.log(`Ver detalles de la mascota: ${pet.name}`, pet);
+    router.push("/(tabs)/petScreen");
     // Aquí puedes navegar a la pantalla de detalles de la mascota
   };
 
@@ -126,18 +128,18 @@ export function FamilySection({ scrollY }: FamilySectionProps) {
         {pets.map((pet, index) => (
           <AnimatedPetCard
             key={pet.id}
-            scrollY={scrollY}
-            scrollX={scrollX}
             index={index}
             petData={{
-              id: pet.id, // 🔥 Incluir el ID real
               name: pet.name,
-              breed: pet.race, // Usar 'race' de la BD
-              image: pet.image, // 🔥 IMAGEN REAL DE LA BD
-              weight: pet.weight, // 🔥 Incluir peso si quieres mostrarlo
-              age: pet.age, // 🔥 Incluir edad si quieres mostrarlo
+              breed: pet.race,
+              // Usar image_url si existe, si no image
+              image: pet.image_url || pet.image,
+              weight: pet.weight,
+              age: pet.age,
             }}
             onPress={() => handleCardPress(pet)}
+            scrollX={scrollX}
+            scrollY={scrollY}
           />
         ))}
 

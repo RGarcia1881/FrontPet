@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { View, Text, TouchableOpacity, Animated, Easing } from "react-native";
+import { useRouter } from "expo-router";
 // 🔥 Eliminamos importaciones de 'react-native-reanimated'
 // import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, Easing } from "react-native-reanimated";
 
@@ -17,6 +18,7 @@ const AnimatedImage = Animated.createAnimatedComponent(Animated.Image);
 export function NewPetCard() {
   // 🔥 1. Valor Animated para la escala
   const scale = useRef(new Animated.Value(1)).current;
+  const router = useRouter();
 
   // 🔥 2. Función para iniciar el pulso infinito
   const startPulse = () => {
@@ -51,7 +53,7 @@ export function NewPetCard() {
   };
 
   const handleAddPet = () => {
-    console.log("Navegar a la pantalla para agregar una nueva mascota.");
+    router.push("/(tabs)/petScreen");
   };
 
   return (
